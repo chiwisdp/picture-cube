@@ -3,6 +3,13 @@
   import { OrbitControls, interactivity } from '@threlte/extras'
   import PictureCube from './PictureCube.svelte'
 
+  type Props = {
+    /** Forwarded to the cube so it can scale up and light its rim during a drag. */
+    dragActive?: boolean
+  }
+
+  let { dragActive = false }: Props = $props()
+
   interactivity()
 </script>
 
@@ -29,4 +36,4 @@
   intensity={0.3}
 />
 
-<PictureCube />
+<PictureCube {dragActive} />

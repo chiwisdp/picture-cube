@@ -6,6 +6,10 @@
     "module": "esnext",
     "types": ["svelte", "vite/client"],
     "allowArbitraryExtensions": true,
+    /* `src/lib/analysis/schema.ts` imports `./webRoles.ts` with its extension,
+       because Vite's native config loader reaches it through the dev API
+       plugin and cannot resolve extensionless relative imports. */
+    "allowImportingTsExtensions": true,
     "noEmit": true,
     /**
      * Typecheck JS in `.svelte` and `.js` files by default.
