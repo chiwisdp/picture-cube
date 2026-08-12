@@ -35,42 +35,31 @@
     bottomLeftCorner = cornerSize,
     children
   }: Props = $props()
-
-  // Builds a chamfered-octagon polygon from each corner's own cut size.
-  // Percentages/calc() are relative to the element's own box, so the same
-  // formula works at any size. A corner size of 0 collapses that corner's
-  // two vertices onto one point — i.e. a plain square corner.
-  const chamfer = (tl: string, tr: string, br: string, bl: string) =>
-    `polygon(${tl} 0, calc(100% - ${tr}) 0, 100% ${tr}, 100% calc(100% - ${br}), calc(100% - ${br}) 100%, ${bl} 100%, 0 calc(100% - ${bl}), 0 ${tl})`
-
-  // Outer layer is the ring color, clipped to the full chamfer.
-  let outerClip = $derived(chamfer(topLeftCorner, topRightCorner, bottomRightCorner, bottomLeftCorner))
-
-  // Inner layer sits inset by borderWidth (via margin, below), so each of its
-  // own corner cuts is approximated as that corner's size minus the inset —
-  // this keeps the ring a roughly even width all the way round, including
-  // the diagonals, without needing a pixel-perfect mitered offset. Clamped
-  // to 0 (via max()) so a corner already at or near 0 doesn't go negative,
-  // which would self-intersect the polygon. A plain border can't do any of
-  // this: it only paints axis-aligned strips along the box's straight edges
-  // with no awareness of clip-path, so when a corner's cut is bigger than
-  // borderWidth the diagonal passes through an area neither strip reaches,
-  // leaving a gap. Two independently clipped filled layers don't have that
-  // problem — the ring is a real shape, not a border trying to trace a
-  // boundary it can't see.
-  const inset = (size: string) => `max(0px, calc(${size} - ${borderWidth}))`
-  let innerClip = $derived(
-    chamfer(inset(topLeftCorner), inset(topRightCorner), inset(bottomRightCorner), inset(bottomLeftCorner))
-  )
 </script>
 
-<div class="inline-block" style:clip-path={outerClip} style:background={color}>
-  <div
-    style:margin={borderWidth}
-    style:padding
-    style:clip-path={innerClip}
-    style:background
-  >
-    {@render children()}
-  </div>
+<!--
+  `corner-shape: bevel` (from the @toolwind/corner-shape plugin, see
+  app.css) reshapes how border-radius rounds each corner into a 45° cut
+  instead of a curve. Each corner's own `border-*-radius` controls that
+  cut's size. Because this is a real border and border-radius — not a
+  clip-path layered on top of a rectangular border — the browser renders
+  the border correctly along the shaped edge with no gaps at the corners.
+
+  corner-shape is a very new CSS property: browsers that don't support it
+  yet just ignore it, so the fallback is a normal rounded-corner border at
+  the same radius, not a broken/square one.
+-->
+<div
+  class="corner-bevel inline-block"
+  style:padding
+  style:border-width={borderWidth}
+  style:border-color={color}
+  style:border-style="solid"
+  style:background
+  style:border-top-left-radius={topLeftCorner}
+  style:border-top-right-radius={topRightCorner}
+  style:border-bottom-right-radius={bottomRightCorner}
+  style:border-bottom-left-radius={bottomLeftCorner}
+>
+  {@render children()}
 </div>

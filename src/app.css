@@ -1,4 +1,38 @@
 @import 'tailwindcss';
+@plugin '@toolwind/corner-shape';
+
+@theme {
+  --color-my-blue: #13003a;
+  --color-my-red: #ff0d1a;
+  --color-my-green: #c2fe0b;
+  --color-my-cyan: #01ffff;
+  --color-my-purple: #5200ff;
+
+  --font-body: 'Body', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-headers: 'Headers', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-logo: 'Logo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@font-face {
+  font-family: 'Body';
+  src: url('/fonts/body.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Headers';
+  src: url('/fonts/headers.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Logo';
+  src: url('/fonts/logo.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
 
 :root {
   color-scheme: dark;
