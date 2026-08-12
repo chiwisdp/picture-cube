@@ -17,9 +17,10 @@ A wrapper component that:
 
 **Props:**
 - `color?: string` — any valid CSS color, applied to the outline. Defaults to `var(--color-indigo-400)`, the same indigo accent already used for the rim glow and focus rings elsewhere in the app.
-- `background?: string` — any valid CSS color, fills the interior behind the content. Defaults to `var(--color-my-blue)`, the app's existing dark background token. New in this revision — a fully see-through hole isn't achievable with this technique without much heavier CSS (SVG evenodd clip-path or a hand-built self-intersecting polygon), which isn't worth the risk/complexity for this component.
+- `background?: string` — any valid CSS color, fills the interior behind the content. Defaults to `var(--color-my-blue)`, the app's existing dark background token. A fully see-through hole isn't achievable with this technique without much heavier CSS (SVG evenodd clip-path or a hand-built self-intersecting polygon), which isn't worth the risk/complexity for this component.
 - `padding?: string` — CSS padding value between the content and the outline. Defaults to `1rem`.
-- `cornerSize?: string` — size of the angled cut at each corner (CSS length). Defaults to `0.75rem`.
+- `cornerSize?: string` — default size of the angled cut at each corner (CSS length). Defaults to `0.75rem`.
+- `topLeftCorner? / topRightCorner? / bottomRightCorner? / bottomLeftCorner?: string` — per-corner override of `cornerSize`. Each defaults to `cornerSize`; passing `'0'` makes that specific corner square instead of angled, and any other length gives that corner its own chamfer size independent of the rest.
 - `borderWidth?: string` — thickness of the outline. Defaults to `2px`.
 - `children: Snippet` — the wrapped content.
 
@@ -37,4 +38,5 @@ A wrapper component that:
 Manual verification (no test suite in this repo):
 - Wrapping arbitrary content (e.g. a short line of text) in `<Frame>` in a scratch usage renders one continuous, fully connected outline with all four corners visibly cut at an angle (no gaps at the diagonals), in the default indigo color, over the default dark interior fill, sized to the content plus `1rem` padding.
 - Passing `color` changes the outline color; `background` changes the interior fill; `padding` changes the gap between content and the outline; `cornerSize` changes how big the angled cut is; `borderWidth` changes the outline's thickness.
+- Setting one of `topLeftCorner`/`topRightCorner`/`bottomRightCorner`/`bottomLeftCorner` to `'0'` makes just that corner square while the other three stay chamfered at `cornerSize`, with no gap at that corner either.
 - `npm run check` passes.

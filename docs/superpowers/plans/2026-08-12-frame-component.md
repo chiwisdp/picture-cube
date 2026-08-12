@@ -13,9 +13,9 @@
 ## Global Constraints
 
 - New file only: `src/lib/components/Frame.svelte`. No existing file is modified as part of this plan (any temporary visual-check edit to `App.svelte` must be reverted before committing).
-- Props (final, after Task 2): `color?: string` (default `'var(--color-indigo-400)'`), `background?: string` (default `'var(--color-my-blue)'`), `padding?: string` (default `'1rem'`), `cornerSize?: string` (default `'0.75rem'`), `borderWidth?: string` (default `'2px'`), `children: Snippet`.
+- Props (final, after Task 3): `color?: string` (default `'var(--color-indigo-400)'`), `background?: string` (default `'var(--color-my-blue)'`), `padding?: string` (default `'1rem'`), `cornerSize?: string` (default `'0.75rem'`), `borderWidth?: string` (default `'2px'`), `topLeftCorner? / topRightCorner? / bottomRightCorner? / bottomLeftCorner?: string` (each defaults to `cornerSize`; `'0'` makes that one corner square), `children: Snippet`.
 - Component sizes itself to its content (`inline-block`), not a fixed box.
-- The outline must be a single continuous, fully connected ring (no gaps at the diagonal cuts) with all four corners cut at a 45° angle by `cornerSize`. A very slight extra thickness at the diagonal cuts (from approximating the inner chamfer as `cornerSize - borderWidth` rather than a precise miter) is accepted — no pixel-perfect miter required.
+- The outline must be a single continuous, fully connected ring (no gaps at the diagonal cuts) with each corner cut at a 45° angle by its own size (globally `cornerSize`, or overridden per corner). A very slight extra thickness at the diagonal cuts (from approximating each inner chamfer as that corner's size minus `borderWidth` rather than a precise miter) is accepted — no pixel-perfect miter required.
 
 ---
 
@@ -198,4 +198,118 @@ Then revert both edits to `src/App.svelte`.
 ```bash
 git add src/lib/components/Frame.svelte
 git commit -m "Fix Frame outline gaps at chamfered corners with a two-layer ring"
+```
+
+---
+
+### Task 3: Per-corner control
+
+**Files:**
+- Modify: `src/lib/components/Frame.svelte` (full rewrite of the file)
+
+**Interfaces:**
+- Consumes: nothing new.
+- Produces: same component name/usage as Task 2, plus four new optional props (`topLeftCorner`, `topRightCorner`, `bottomRightCorner`, `bottomLeftCorner`). Existing callers passing only `cornerSize` continue to work unchanged — each new prop defaults to `cornerSize`.
+
+- [ ] **Step 1: Replace the full contents of `src/lib/components/Frame.svelte`**
+
+```svelte
+<script lang="ts">
+  import type { Snippet } from 'svelte'
+
+  type Props = {
+    /** Any valid CSS color for the outline. */
+    color?: string
+    /** Any valid CSS color for the interior, behind the content. */
+    background?: string
+    /** Space between the content and the outline. */
+    padding?: string
+    /** Default size of the angled cut at each corner (CSS length). */
+    cornerSize?: string
+    /** Thickness of the outline. */
+    borderWidth?: string
+    /** Overrides `cornerSize` for just the top-left corner. Use '0' for a square (non-angled) corner. */
+    topLeftCorner?: string
+    /** Overrides `cornerSize` for just the top-right corner. Use '0' for a square (non-angled) corner. */
+    topRightCorner?: string
+    /** Overrides `cornerSize` for just the bottom-right corner. Use '0' for a square (non-angled) corner. */
+    bottomRightCorner?: string
+    /** Overrides `cornerSize` for just the bottom-left corner. Use '0' for a square (non-angled) corner. */
+    bottomLeftCorner?: string
+    children: Snippet
+  }
+
+  let {
+    color = 'var(--color-indigo-400)',
+    background = 'var(--color-my-blue)',
+    padding = '1rem',
+    cornerSize = '0.75rem',
+    borderWidth = '2px',
+    topLeftCorner = cornerSize,
+    topRightCorner = cornerSize,
+    bottomRightCorner = cornerSize,
+    bottomLeftCorner = cornerSize,
+    children
+  }: Props = $props()
+
+  // Builds a chamfered-octagon polygon from each corner's own cut size.
+  // Percentages/calc() are relative to the element's own box, so the same
+  // formula works at any size. A corner size of 0 collapses that corner's
+  // two vertices onto one point — i.e. a plain square corner.
+  const chamfer = (tl: string, tr: string, br: string, bl: string) =>
+    `polygon(${tl} 0, calc(100% - ${tr}) 0, 100% ${tr}, 100% calc(100% - ${br}), calc(100% - ${br}) 100%, ${bl} 100%, 0 calc(100% - ${bl}), 0 ${tl})`
+
+  // Outer layer is the ring color, clipped to the full chamfer.
+  let outerClip = $derived(chamfer(topLeftCorner, topRightCorner, bottomRightCorner, bottomLeftCorner))
+
+  // Inner layer sits inset by borderWidth (via margin, below), so each of its
+  // own corner cuts is approximated as that corner's size minus the inset —
+  // this keeps the ring a roughly even width all the way round, including
+  // the diagonals, without needing a pixel-perfect mitered offset. Clamped
+  // to 0 (via max()) so a corner already at or near 0 doesn't go negative,
+  // which would self-intersect the polygon. A plain border can't do any of
+  // this: it only paints axis-aligned strips along the box's straight edges
+  // with no awareness of clip-path, so when a corner's cut is bigger than
+  // borderWidth the diagonal passes through an area neither strip reaches,
+  // leaving a gap. Two independently clipped filled layers don't have that
+  // problem — the ring is a real shape, not a border trying to trace a
+  // boundary it can't see.
+  const inset = (size: string) => `max(0px, calc(${size} - ${borderWidth}))`
+  let innerClip = $derived(
+    chamfer(inset(topLeftCorner), inset(topRightCorner), inset(bottomRightCorner), inset(bottomLeftCorner))
+  )
+</script>
+
+<div class="inline-block" style:clip-path={outerClip} style:background={color}>
+  <div
+    style:margin={borderWidth}
+    style:padding
+    style:clip-path={innerClip}
+    style:background
+  >
+    {@render children()}
+  </div>
+</div>
+```
+
+- [ ] **Step 2: Type-check**
+
+Run: `npm run check`
+Expected: no errors.
+
+- [ ] **Step 3: Manual visual check**
+
+Using the same temporary `App.svelte` scratch usage pattern as Tasks 1-2, try e.g.:
+
+```svelte
+<Frame topLeftCorner="0" bottomRightCorner="0"><p class="p-4 text-white">Frame test</p></Frame>
+```
+
+Expected: top-left and bottom-right corners render square (no angled cut), top-right and bottom-left still render chamfered at the default `cornerSize`, and the outline stays fully connected all the way around — including at the two square corners (no gap there either). Revert the temporary edit afterward.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/lib/components/Frame.svelte
+git commit -m "Add per-corner control to Frame, so each corner can be square or angled independently"
 ```
