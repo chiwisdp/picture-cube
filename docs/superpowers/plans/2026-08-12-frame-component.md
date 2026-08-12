@@ -2,18 +2,18 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a reusable `Frame.svelte` component that draws a corner-bracket outline around whatever content is placed inside it.
+**Goal:** Add a reusable `Frame.svelte` component that draws a continuous outline with angled (chamfered) corners around whatever content is placed inside it.
 
-**Architecture:** A single new Svelte component, content-sized, with no dependency on any existing component and no changes to any existing file. It renders its `children` snippet plus four absolutely-positioned `<span>` corner brackets (two adjacent borders each) inside a `position: relative` wrapper.
+**Architecture:** A single new Svelte component, content-sized, with no dependency on any existing component and no changes to any existing file. It's a single `<div>` with a solid CSS `border` and a `clip-path: polygon(...)` that cuts all four corners at 45°, sized by a `cornerSize` prop.
 
-**Tech Stack:** Svelte 5 (runes, snippets), Tailwind v4 utility classes for border width, inline `style:` directives for the caller-controlled color/padding/size values Tailwind can't generate at runtime. No test runner in this repo — verification is `npm run check` plus a temporary manual visual check via `npm run dev`.
+**Tech Stack:** Svelte 5 (runes, snippets, `$derived`), inline `style:` directives for the caller-controlled color/padding/size values (Tailwind can't generate classes from runtime prop values). No test runner in this repo — verification is `npm run check` plus a temporary manual visual check via `npm run dev`.
 
 ## Global Constraints
 
-- New file only: `src/lib/components/Frame.svelte`. No existing file is modified as part of this plan.
-- Props: `color?: string` (default `'var(--color-indigo-400)'`), `padding?: string` (default `'1rem'`), `children: Snippet`.
-- Corner bracket length is fixed at `1.25rem`, thickness fixed at `2px` (via Tailwind's `border-*-2` utilities) — not exposed as props.
+- New file only: `src/lib/components/Frame.svelte`. No existing file is modified as part of this plan (the temporary visual-check edit to `App.svelte` in Task 1 Step 3 must be reverted before committing).
+- Props: `color?: string` (default `'var(--color-indigo-400)'`), `padding?: string` (default `'1rem'`), `cornerSize?: string` (default `'0.75rem'`), `borderWidth?: string` (default `'2px'`), `children: Snippet`.
 - Component sizes itself to its content (`inline-block`), not a fixed box.
+- The border is a single continuous outline (not separate corner pieces) with all four corners cut at a 45° angle by `cornerSize`. A very slight extra thickness at the diagonal cuts (a known `clip-path`-on-a-bordered-box quirk) is accepted — no double-layered miter.
 
 ---
 
@@ -24,7 +24,7 @@
 
 **Interfaces:**
 - Consumes: nothing from elsewhere in the codebase.
-- Produces: a default-exported Svelte component usable as `<Frame color="..." padding="...">...</Frame>`, for any future caller to import from `./lib/components/Frame.svelte`.
+- Produces: a default-exported Svelte component usable as `<Frame color="..." padding="..." cornerSize="..." borderWidth="...">...</Frame>`, for any future caller to import from `./lib/components/Frame.svelte`.
 
 - [ ] **Step 1: Write the component**
 
@@ -33,46 +33,41 @@
   import type { Snippet } from 'svelte'
 
   type Props = {
-    /** Any valid CSS color for the corner brackets. */
+    /** Any valid CSS color for the outline. */
     color?: string
-    /** Space between the content and the corner brackets. */
+    /** Space between the content and the outline. */
     padding?: string
+    /** Size of the angled cut at each corner (CSS length). */
+    cornerSize?: string
+    /** Thickness of the outline. */
+    borderWidth?: string
     children: Snippet
   }
 
-  let { color = 'var(--color-indigo-400)', padding = '1rem', children }: Props = $props()
+  let {
+    color = 'var(--color-indigo-400)',
+    padding = '1rem',
+    cornerSize = '0.75rem',
+    borderWidth = '2px',
+    children
+  }: Props = $props()
 
-  // Fixed corner size — promote to a prop later if a real use case needs to vary it.
-  const CORNER_LENGTH = '1.25rem'
+  // Chamfers all four corners by `cornerSize`. Percentages/calc() are relative
+  // to this element's own box, so the same polygon works at any size.
+  let clipPath = $derived(
+    `polygon(${cornerSize} 0, calc(100% - ${cornerSize}) 0, 100% ${cornerSize}, 100% calc(100% - ${cornerSize}), calc(100% - ${cornerSize}) 100%, ${cornerSize} 100%, 0 calc(100% - ${cornerSize}), 0 ${cornerSize})`
+  )
 </script>
 
-<div class="relative inline-block" style:padding>
+<div
+  class="inline-block"
+  style:padding
+  style:border-width={borderWidth}
+  style:border-color={color}
+  style:border-style="solid"
+  style:clip-path={clipPath}
+>
   {@render children()}
-
-  <span
-    class="pointer-events-none absolute top-0 left-0 border-t-2 border-l-2"
-    style:width={CORNER_LENGTH}
-    style:height={CORNER_LENGTH}
-    style:border-color={color}
-  ></span>
-  <span
-    class="pointer-events-none absolute top-0 right-0 border-t-2 border-r-2"
-    style:width={CORNER_LENGTH}
-    style:height={CORNER_LENGTH}
-    style:border-color={color}
-  ></span>
-  <span
-    class="pointer-events-none absolute bottom-0 left-0 border-b-2 border-l-2"
-    style:width={CORNER_LENGTH}
-    style:height={CORNER_LENGTH}
-    style:border-color={color}
-  ></span>
-  <span
-    class="pointer-events-none absolute bottom-0 right-0 border-b-2 border-r-2"
-    style:width={CORNER_LENGTH}
-    style:height={CORNER_LENGTH}
-    style:border-color={color}
-  ></span>
 </div>
 ```
 
@@ -95,7 +90,7 @@ with the import added to the `<script>` block:
 import Frame from './lib/components/Frame.svelte'
 ```
 
-Run `npm run dev` (or use the already-running dev server) and open the local URL. Expected: a box with "Frame test" inside it, with four indigo corner brackets (top-left, top-right, bottom-left, bottom-right) around it — no continuous border on the sides, just the four corners.
+Run `npm run dev` (or use the already-running dev server) and open the local URL. Expected: a box with "Frame test" inside it, with one continuous indigo outline around it whose four corners are visibly cut at a 45° angle (not square, not rounded).
 
 Then revert both edits to `src/App.svelte` (the import and the temporary `<Frame>` usage) — this plan only adds the standalone component, not any wiring into the app.
 
@@ -103,5 +98,5 @@ Then revert both edits to `src/App.svelte` (the import and the temporary `<Frame
 
 ```bash
 git add src/lib/components/Frame.svelte
-git commit -m "Add reusable corner-bracket Frame component"
+git commit -m "Add reusable chamfered-corner Frame component"
 ```
