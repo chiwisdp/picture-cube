@@ -14,7 +14,7 @@
 - No dependencies are added or removed from `package.json` — `@threlte/extras` (which provides `Environment`) is already a dependency.
 - The `dragActive` prop keeps flowing `App → Scene → PictureCube` with the same name and type (`boolean`, default `false`).
 - Cube material: `metalness={1}`, `roughness={0.1}`, no `map`.
-- Environment: `<Environment preset="city" />` in `Scene.svelte`.
+- Environment: `<VirtualEnvironment>` (procedural, no external asset) in `Scene.svelte`, since the installed `@threlte/extras@9.21.0` has no drei-style `preset` prop.
 - New subtitle copy in `App.svelte`: `Drop images to analyse them`.
 
 ---
@@ -153,35 +153,67 @@ git commit -m "Replace per-face image textures with a single polished-chrome mat
 
 ---
 
-### Task 2: Add an Environment so the chrome has reflections
+### Task 2: Add a procedural VirtualEnvironment so the chrome has reflections
 
 **Files:**
-- Modify: `src/lib/Scene.svelte:1-14` (import line and script body), `src/lib/Scene.svelte` (template, add one line)
+- Modify: `src/lib/Scene.svelte` (imports and template)
 
 **Interfaces:**
 - Consumes: `PictureCube` from Task 1 (same `{ dragActive }` usage as before — no change to how `Scene.svelte` invokes it).
 - Produces: nothing new consumed by other tasks.
 
-- [ ] **Step 1: Add the `Environment` import**
+**Note:** `@threlte/extras@9.21.0` has no drei-style `<Environment preset="...">`. Its `Environment` component only accepts a real HDRI (`url`/`texture`/`files`), which this repo doesn't have. Instead, use `<VirtualEnvironment>`, which builds a reflection map procedurally from plain meshes placed inside it — no external asset needed.
+
+- [ ] **Step 1: Update the `@threlte/extras` import and add a `THREE` import**
 
 In `src/lib/Scene.svelte`, change:
 
 ```svelte
+  import { T } from '@threlte/core'
   import { OrbitControls, interactivity } from '@threlte/extras'
+  import PictureCube from './PictureCube.svelte'
 ```
 
 to:
 
 ```svelte
-  import { Environment, OrbitControls, interactivity } from '@threlte/extras'
+  import { T } from '@threlte/core'
+  import { OrbitControls, VirtualEnvironment, interactivity } from '@threlte/extras'
+  import * as THREE from 'three'
+  import PictureCube from './PictureCube.svelte'
 ```
 
-- [ ] **Step 2: Render the Environment**
+- [ ] **Step 2: Render the VirtualEnvironment**
 
-In the template, after the two `T.DirectionalLight` elements and before `<PictureCube {dragActive} />`, add:
+In the template, after the two `T.DirectionalLight` elements and before `<PictureCube {dragActive} />`, add a small box-shaped rig of six unlit planes (bright top, dark bottom, indigo/neutral sides) so the chrome has varied reflections instead of a single flat color:
 
 ```svelte
-<Environment preset="city" />
+<VirtualEnvironment resolution={256}>
+  <T.Mesh position={[0, 6, 0]}>
+    <T.PlaneGeometry args={[12, 12]} />
+    <T.MeshBasicMaterial color="#ffffff" side={THREE.DoubleSide} />
+  </T.Mesh>
+  <T.Mesh position={[0, -6, 0]}>
+    <T.PlaneGeometry args={[12, 12]} />
+    <T.MeshBasicMaterial color="#08080d" side={THREE.DoubleSide} />
+  </T.Mesh>
+  <T.Mesh position={[6, 0, 0]}>
+    <T.PlaneGeometry args={[12, 12]} />
+    <T.MeshBasicMaterial color="#6366f1" side={THREE.DoubleSide} />
+  </T.Mesh>
+  <T.Mesh position={[-6, 0, 0]}>
+    <T.PlaneGeometry args={[12, 12]} />
+    <T.MeshBasicMaterial color="#1e1e2e" side={THREE.DoubleSide} />
+  </T.Mesh>
+  <T.Mesh position={[0, 0, 6]}>
+    <T.PlaneGeometry args={[12, 12]} />
+    <T.MeshBasicMaterial color="#c7d2fe" side={THREE.DoubleSide} />
+  </T.Mesh>
+  <T.Mesh position={[0, 0, -6]}>
+    <T.PlaneGeometry args={[12, 12]} />
+    <T.MeshBasicMaterial color="#08080d" side={THREE.DoubleSide} />
+  </T.Mesh>
+</VirtualEnvironment>
 ```
 
 So the tail of the template reads:
@@ -192,7 +224,9 @@ So the tail of the template reads:
   intensity={0.3}
 />
 
-<Environment preset="city" />
+<VirtualEnvironment resolution={256}>
+  <!-- six planes as above -->
+</VirtualEnvironment>
 
 <PictureCube {dragActive} />
 ```
