@@ -1,43 +1,43 @@
 <script lang="ts">
-  import { Motion } from 'svelte-motion'
-  import type { DroppedImage } from './image/store.svelte'
-  import { FACES_PER_PAGE, imageStatusLabels, imageStore } from './image/store.svelte'
+  import { Motion } from 'svelte-motion';
+  import type { DroppedImage } from './image/store.svelte';
+  import { FACES_PER_PAGE, imageStatusLabels, imageStore } from './image/store.svelte';
 
   const statusDotClasses: Record<DroppedImage['status'], string> = {
     decoding: 'bg-amber-400',
     queued: 'bg-neutral-500',
     analyzing: 'bg-indigo-400 animate-pulse',
     done: 'bg-emerald-400',
-    error: 'bg-rose-500'
-  }
+    error: 'bg-rose-500',
+  };
 
-  let itemElements = $state<Record<string, HTMLButtonElement | undefined>>({})
+  let itemElements = $state<Record<string, HTMLButtonElement | undefined>>({});
 
   /** The failure reason is part of the label, so a screen reader hears why. */
   const describeItem = (image: DroppedImage, index: number): string => {
-    const base = `${image.fileName}, image ${index + 1} of ${imageStore.images.length}, ${imageStatusLabels[image.status]}`
-    return image.error ? `${base}. ${image.error}` : base
-  }
+    const base = `${image.fileName}, image ${index + 1} of ${imageStore.images.length}, ${imageStatusLabels[image.status]}`;
+    return image.error ? `${base}. ${image.error}` : base;
+  };
 
   const handleSelect = (id: string): void => {
-    imageStore.select(id)
-  }
+    imageStore.select(id);
+  };
 
   const handleRemove = (event: MouseEvent, id: string): void => {
-    event.stopPropagation()
-    imageStore.remove(id)
-  }
+    event.stopPropagation();
+    imageStore.remove(id);
+  };
 
   const handleClearAll = (): void => {
-    imageStore.clear()
-  }
+    imageStore.clear();
+  };
 
   // Keeps the selected thumbnail in view when the selection came from the cube.
   $effect(() => {
-    const id = imageStore.selectedId
-    if (!id) return
-    itemElements[id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-  })
+    const id = imageStore.selectedId;
+    if (!id) return;
+    itemElements[id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  });
 </script>
 
 {#if imageStore.hasImages}
@@ -98,7 +98,7 @@
                 'group relative flex w-18 flex-col gap-1 rounded-lg border p-1 text-left transition focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none',
                 isSelected
                   ? 'border-indigo-400/80 bg-indigo-500/10'
-                  : 'border-white/10 hover:border-white/25'
+                  : 'border-white/10 hover:border-white/25',
               ]}
               onclick={() => handleSelect(image.id)}
             >
@@ -122,7 +122,7 @@
                 <span
                   class={[
                     'absolute top-1 right-1 h-1.5 w-1.5 rounded-full',
-                    statusDotClasses[image.status]
+                    statusDotClasses[image.status],
                   ]}
                   aria-hidden="true"
                 ></span>

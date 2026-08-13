@@ -1,89 +1,89 @@
 <script lang="ts">
-  import { untrack } from 'svelte'
-  import type { WebRole } from './analysis/webRoles'
-  import type { CropFocalPoint, RoleCrop } from './image/cropForRole'
+  import { untrack } from 'svelte';
+  import type { WebRole } from './analysis/webRoles';
+  import type { CropFocalPoint, RoleCrop } from './image/cropForRole';
   import {
     DEFAULT_CROP_QUALITY,
     cropForRole,
     releaseRoleCrop,
-    roleCropFileName
-  } from './image/cropForRole'
-  import type { EncodeSupport } from './image/encodeSupport'
-  import { getEncodeSupport } from './image/encodeSupport'
-  import { formatFileSize } from './image/extractMetadata'
+    roleCropFileName,
+  } from './image/cropForRole';
+  import type { EncodeSupport } from './image/encodeSupport';
+  import { getEncodeSupport } from './image/encodeSupport';
+  import { formatFileSize } from './image/extractMetadata';
 
   type Props = {
-    bitmap: ImageBitmap
+    bitmap: ImageBitmap;
     /** Re-encoded thumbnail of the source, for the crop-rect overlay. */
-    sourceUrl: string | null
-    sourceName: string
-    role: WebRole
-    focalPoint: CropFocalPoint
+    sourceUrl: string | null;
+    sourceName: string;
+    role: WebRole;
+    focalPoint: CropFocalPoint;
     /** From `ImageMetadata.hasTransparency`; forces a format that keeps alpha. */
-    hasAlpha: boolean
-  }
+    hasAlpha: boolean;
+  };
 
-  let { bitmap, sourceUrl, sourceName, role, focalPoint, hasAlpha }: Props = $props()
+  let { bitmap, sourceUrl, sourceName, role, focalPoint, hasAlpha }: Props = $props();
 
   /** Long enough that dragging the quality slider does not re-encode per step. */
-  const REENCODE_DEBOUNCE_MS = 140
+  const REENCODE_DEBOUNCE_MS = 140;
 
-  let crop = $state<RoleCrop | null>(null)
-  let quality = $state(DEFAULT_CROP_QUALITY)
-  let allowUpscale = $state(false)
-  let generating = $state(true)
-  let failure = $state<string | null>(null)
-  let encodeSupport = $state<EncodeSupport | null>(null)
+  let crop = $state<RoleCrop | null>(null);
+  let quality = $state(DEFAULT_CROP_QUALITY);
+  let allowUpscale = $state(false);
+  let generating = $state(true);
+  let failure = $state<string | null>(null);
+  let encodeSupport = $state<EncodeSupport | null>(null);
 
   /** Every crop mints an object URL, so the outgoing one has to be revoked. */
   const replaceCrop = (next: RoleCrop | null): void => {
-    const previous = untrack(() => crop)
-    if (previous) releaseRoleCrop(previous)
-    crop = next
-  }
+    const previous = untrack(() => crop);
+    if (previous) releaseRoleCrop(previous);
+    crop = next;
+  };
 
   let weightPercent = $derived(
-    crop ? Math.min(100, Math.round((crop.bytes / (crop.maxWeightKb * 1024)) * 100)) : 0
-  )
+    crop ? Math.min(100, Math.round((crop.bytes / (crop.maxWeightKb * 1024)) * 100)) : 0,
+  );
 
   let overlayRect = $derived.by(() => {
-    if (!crop) return null
-    const { cropRect } = crop
+    if (!crop) return null;
+    const { cropRect } = crop;
     return {
       left: `${(cropRect.x / bitmap.width) * 100}%`,
       top: `${(cropRect.y / bitmap.height) * 100}%`,
       width: `${(cropRect.width / bitmap.width) * 100}%`,
-      height: `${(cropRect.height / bitmap.height) * 100}%`
-    }
-  })
+      height: `${(cropRect.height / bitmap.height) * 100}%`,
+    };
+  });
 
   let formatNote = $derived.by(() => {
-    if (!crop || crop.format === role.preferredFormat) return null
+    if (!crop || crop.format === role.preferredFormat) return null;
 
-    const target = role.preferredFormat.toUpperCase()
-    const actual = crop.format.toUpperCase()
+    const target = role.preferredFormat.toUpperCase();
+    const actual = crop.format.toUpperCase();
     if (hasAlpha && role.preferredFormat === 'jpeg') {
-      return `Exported as ${actual} instead of ${target} so the transparency survives.`
+      return `Exported as ${actual} instead of ${target} so the transparency survives.`;
     }
     if (encodeSupport && !encodeSupport[role.preferredFormat]) {
-      return `This browser cannot encode ${target}, so the crop ships as ${actual}.`
+      return `This browser cannot encode ${target}, so the crop ships as ${actual}.`;
     }
-    return `Exported as ${actual} rather than ${target}.`
-  })
+    return `Exported as ${actual} rather than ${target}.`;
+  });
 
   const handleQualityInput = (event: Event): void => {
-    quality = Number((event.currentTarget as HTMLInputElement).value)
-  }
+    quality = Number((event.currentTarget as HTMLInputElement).value);
+  };
 
   const handleUpscaleToggle = (event: Event): void => {
-    allowUpscale = (event.currentTarget as HTMLInputElement).checked
-  }
+    allowUpscale = (event.currentTarget as HTMLInputElement).checked;
+  };
 
   $effect(() => {
     void getEncodeSupport().then((support) => {
-      encodeSupport = support
-    })
-  })
+      encodeSupport = support;
+    });
+  });
 
   $effect(() => {
     const request = {
@@ -92,45 +92,45 @@
       point: { x: focalPoint.x, y: focalPoint.y },
       quality,
       hasAlpha,
-      allowUpscale
-    }
+      allowUpscale,
+    };
 
-    let cancelled = false
-    generating = true
+    let cancelled = false;
+    generating = true;
 
     const timer = setTimeout(() => {
       void cropForRole(request.bitmap, request.role, request.point, {
         quality: request.quality,
         hasAlpha: request.hasAlpha,
-        allowUpscale: request.allowUpscale
+        allowUpscale: request.allowUpscale,
       })
         .then((next) => {
           if (cancelled) {
-            releaseRoleCrop(next)
-            return
+            releaseRoleCrop(next);
+            return;
           }
-          replaceCrop(next)
-          failure = null
+          replaceCrop(next);
+          failure = null;
         })
         .catch((error: unknown) => {
-          if (cancelled) return
-          failure = error instanceof Error ? error.message : 'The crop could not be generated.'
+          if (cancelled) return;
+          failure = error instanceof Error ? error.message : 'The crop could not be generated.';
         })
         .finally(() => {
-          if (!cancelled) generating = false
-        })
-    }, REENCODE_DEBOUNCE_MS)
+          if (!cancelled) generating = false;
+        });
+    }, REENCODE_DEBOUNCE_MS);
 
     return () => {
-      cancelled = true
-      clearTimeout(timer)
-    }
-  })
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  });
 
   $effect(() => () => {
-    const last = untrack(() => crop)
-    if (last) releaseRoleCrop(last)
-  })
+    const last = untrack(() => crop);
+    if (last) releaseRoleCrop(last);
+  });
 </script>
 
 <div class="mt-3 space-y-3 rounded-xl border border-white/10 bg-[#12121a] p-3">
@@ -197,7 +197,7 @@
         <dd
           class={[
             'mt-0.5 font-medium',
-            crop.withinWeightBudget ? 'text-emerald-300' : 'text-amber-300'
+            crop.withinWeightBudget ? 'text-emerald-300' : 'text-amber-300',
           ]}
         >
           {formatFileSize(crop.bytes)}
@@ -208,7 +208,10 @@
     <div class="space-y-1">
       <div class="h-1 w-full overflow-hidden rounded-full bg-white/10">
         <div
-          class={['h-full rounded-full', crop.withinWeightBudget ? 'bg-emerald-400' : 'bg-amber-400']}
+          class={[
+            'h-full rounded-full',
+            crop.withinWeightBudget ? 'bg-emerald-400' : 'bg-amber-400',
+          ]}
           style:width={`${weightPercent}%`}
         ></div>
       </div>
@@ -224,8 +227,8 @@
     {#if crop.upscaleNeeded}
       <p class="rounded-lg bg-amber-500/10 px-3 py-2 text-[11px] text-amber-200">
         The source only offers {crop.cropRect.width} &times; {crop.cropRect.height} px at this ratio,
-        below the {role.width} &times; {role.height} px target. The crop is left at its true size
-        rather than upscaled.
+        below the {role.width} &times; {role.height} px target. The crop is left at its true size rather
+        than upscaled.
       </p>
     {/if}
   {/if}
@@ -244,7 +247,7 @@
         class="h-1 flex-1 cursor-pointer appearance-none rounded-full bg-white/15 accent-indigo-400 disabled:cursor-not-allowed disabled:opacity-40"
         oninput={handleQualityInput}
       />
-      <span class="w-8 shrink-0 text-right tabular-nums text-neutral-200">
+      <span class="w-8 shrink-0 text-right text-neutral-200 tabular-nums">
         {Math.round(quality * 100)}
       </span>
     </label>

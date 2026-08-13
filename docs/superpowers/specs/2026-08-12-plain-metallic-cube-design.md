@@ -13,6 +13,7 @@ Only the cube's visual/material layer and its face-click interaction change. The
 ### `src/lib/PictureCube.svelte`
 
 Remove everything that exists to put an image on a face:
+
 - `faceTextures`, `createBitmapTexture`, `createPlaceholderTexture`, `attachFace`
 - `pageBitmaps`, `cachedSignature`, `cachedBitmaps`
 - `handleFaceClick`, `selectedFaceIndex`, and the effect that rotates the group to face the selected image
@@ -20,6 +21,7 @@ Remove everything that exists to put an image on a face:
 - The `imageStore` and `FACES_PER_PAGE` imports
 
 Replace the `{#each faceTextures as texture, index}` block (six `MeshStandardMaterial` instances wired to `attach`) with a single `T.MeshStandardMaterial`:
+
 - `metalness={1}`
 - `roughness={0.1}`
 - no `map`
@@ -49,6 +51,7 @@ No other changes to `App.svelte`.
 ## Testing
 
 Manual verification (per project convention — no test suite exists yet):
+
 - Cube renders as a single reflective chrome material on all six faces, no placeholder/image textures.
 - Dropping/selecting images in the tray still triggers analysis and opens the panel; cube no longer reacts to or reflects the selection.
 - Idle spin, entrance spin, hover scale-up, and drag rim-glow still behave as before.

@@ -82,18 +82,18 @@ unaffected by input format: the preview is always a canvas-derived JPEG capped
 at 1024px on the long edge, sent to OpenRouter as a `data:image/jpeg;base64,…`
 image URL.
 
-| Format | Decode path | Verified |
-| --- | --- | --- |
-| JPEG | `createImageBitmap` | yes, including JFIF DPI |
-| PNG | `createImageBitmap` | yes, including `pHYs` DPI and real alpha |
-| GIF | `createImageBitmap` | yes, static and animated |
-| WebP | `createImageBitmap` | yes |
-| BMP | `createImageBitmap` | yes |
-| ICO | `createImageBitmap` | yes |
-| TIFF | `utif2`, lazy-imported | yes |
-| SVG | rasterised through an `<img>` | yes, with and without intrinsic size |
-| AVIF | `createImageBitmap` | not tested — see below |
-| HEIC / HEIF | none; native attempt only | yes, the rejection message |
+| Format      | Decode path                   | Verified                                 |
+| ----------- | ----------------------------- | ---------------------------------------- |
+| JPEG        | `createImageBitmap`           | yes, including JFIF DPI                  |
+| PNG         | `createImageBitmap`           | yes, including `pHYs` DPI and real alpha |
+| GIF         | `createImageBitmap`           | yes, static and animated                 |
+| WebP        | `createImageBitmap`           | yes                                      |
+| BMP         | `createImageBitmap`           | yes                                      |
+| ICO         | `createImageBitmap`           | yes                                      |
+| TIFF        | `utif2`, lazy-imported        | yes                                      |
+| SVG         | rasterised through an `<img>` | yes, with and without intrinsic size     |
+| AVIF        | `createImageBitmap`           | not tested — see below                   |
+| HEIC / HEIF | none; native attempt only     | yes, the rejection message               |
 
 AVIF is untested only because there was no way to produce an AVIF file on the
 test machine: Chrome decodes AVIF but cannot encode it, and no encoder was

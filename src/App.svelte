@@ -1,42 +1,41 @@
 <script lang="ts">
-  import { Canvas } from '@threlte/core'
-  import { Motion } from 'svelte-motion'
-  import AnalysisPanel from './lib/AnalysisPanel.svelte'
-  import DropLayer from './lib/DropLayer.svelte'
-  import ImageTray from './lib/ImageTray.svelte'
-  import Scene from './lib/Scene.svelte'
-  import { imageStore } from './lib/image/store.svelte'
-  import Frame from './lib/components/Frame.svelte';
+  import { Canvas } from '@threlte/core';
+  import { Motion } from 'svelte-motion';
+  import AnalysisPanel from './lib/AnalysisPanel.svelte';
+  import DropLayer from './lib/DropLayer.svelte';
+  import ImageTray from './lib/ImageTray.svelte';
+  import Scene from './lib/Scene.svelte';
+  import { imageStore } from './lib/image/store.svelte';
   import LogoOverlay from './lib/LogoOverlay.svelte';
-  import { fileInputAccept } from './lib/image/sniffFormat'
+  import { fileInputAccept } from './lib/image/sniffFormat';
 
-  let dragActive = $state(false)
+  let dragActive = $state(false);
   // Owned here (not DropLayer) because both DropLayer's "browse" link and the
   // 3D cube's click need to open the same hidden file picker.
-  let fileInput = $state<HTMLInputElement>()
+  let fileInput = $state<HTMLInputElement>();
 
   const handleFiles = (files: File[]): void => {
-    void imageStore.addFiles(files)
-  }
+    void imageStore.addFiles(files);
+  };
 
   const handleBrowse = (): void => {
-    fileInput?.click()
-  }
+    fileInput?.click();
+  };
 
   const handleFileInputChange = (event: Event): void => {
-    const input = event.currentTarget as HTMLInputElement
-    if (input.files && input.files.length > 0) handleFiles(Array.from(input.files))
+    const input = event.currentTarget as HTMLInputElement;
+    if (input.files && input.files.length > 0) handleFiles(Array.from(input.files));
     // Reset so re-picking the same file fires `change` again.
-    input.value = ''
-  }
+    input.value = '';
+  };
 
   const handlePrevPage = (): void => {
-    imageStore.prevPage()
-  }
+    imageStore.prevPage();
+  };
 
   const handleNextPage = (): void => {
-    imageStore.nextPage()
-  }
+    imageStore.nextPage();
+  };
 </script>
 
 <main class="relative h-screen w-screen overflow-hidden bg-my-blue text-neutral-100">
@@ -57,8 +56,7 @@
     </Canvas>
   </div>
 
-<LogoOverlay />
-
+  <LogoOverlay />
 
   <DropLayer
     bind:active={dragActive}

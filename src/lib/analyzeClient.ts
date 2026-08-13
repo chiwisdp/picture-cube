@@ -34,8 +34,7 @@ export type AnalyzeRequest = {
 };
 
 export type AnalyzeResult =
-  | { ok: true; analysis: ImageAnalysis }
-  | { ok: false; error: string; aborted: boolean };
+  { ok: true; analysis: ImageAnalysis } | { ok: false; error: string; aborted: boolean };
 
 const UNREACHABLE_MESSAGE =
   'Could not reach the analysis service. Check that the dev server is running.';

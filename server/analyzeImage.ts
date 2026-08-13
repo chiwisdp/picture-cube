@@ -234,11 +234,7 @@ const extractUpstreamMessage = (body: unknown): string | null => {
   return null;
 };
 
-const mapUpstreamHttpError = (
-  status: number,
-  model: string,
-  body?: unknown,
-): AnalyzeError => {
+const mapUpstreamHttpError = (status: number, model: string, body?: unknown): AnalyzeError => {
   const upstream = extractUpstreamMessage(body);
 
   if (status === 401 || status === 403) {
@@ -327,7 +323,8 @@ const formatMetadataForPrompt = (metadata: ImageMetadataInput): string => {
 
   if (metadata.fileName) lines.push(`- file name: ${metadata.fileName}`);
   if (metadata.aspectRatioLabel) lines.push(`- aspect ratio: ${metadata.aspectRatioLabel}`);
-  else if (metadata.aspectRatio) lines.push(`- aspect ratio: ${formatNumber(metadata.aspectRatio, 3)}`);
+  else if (metadata.aspectRatio)
+    lines.push(`- aspect ratio: ${formatNumber(metadata.aspectRatio, 3)}`);
   if (metadata.megapixels) lines.push(`- megapixels: ${formatNumber(metadata.megapixels, 2)} MP`);
   if (metadata.dpi) lines.push(`- DPI: ${formatNumber(metadata.dpi, 1)}`);
   if (metadata.bytesPerPixel) {
@@ -469,7 +466,9 @@ type OpenRouterSuccessBody = {
   usage?: OpenRouterUsage;
 };
 
-const extractContent = (body: OpenRouterSuccessBody): {
+const extractContent = (
+  body: OpenRouterSuccessBody,
+): {
   content: string | null;
   finishReason: string | null;
   refusal: string | null;
@@ -542,7 +541,11 @@ export const analyzeImage = async (
   options: AnalyzeOptions,
 ): Promise<AnalyzeResult> => {
   if (!options.apiKey) {
-    throw new AnalyzeError(502, 'upstream_auth', 'No OpenRouter API key is configured on the server.');
+    throw new AnalyzeError(
+      502,
+      'upstream_auth',
+      'No OpenRouter API key is configured on the server.',
+    );
   }
 
   if (request.base64.startsWith('data:')) {
@@ -610,7 +613,10 @@ export const analyzeImage = async (
       if (options.signal?.aborted) {
         throw new AnalyzeError(499, 'request_aborted', 'The analysis request was cancelled.');
       }
-      if (cause instanceof Error && (cause.name === 'TimeoutError' || cause.name === 'AbortError')) {
+      if (
+        cause instanceof Error &&
+        (cause.name === 'TimeoutError' || cause.name === 'AbortError')
+      ) {
         throw new AnalyzeError(504, 'upstream_timeout', 'OpenRouter did not respond in time.');
       }
       throw cause;

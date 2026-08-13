@@ -146,7 +146,8 @@ export const formatFileSize = (bytes: number): string => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
 
-const greatestCommonDivisor = (a: number, b: number): number => (b === 0 ? a : greatestCommonDivisor(b, a % b));
+const greatestCommonDivisor = (a: number, b: number): number =>
+  b === 0 ? a : greatestCommonDivisor(b, a % b);
 
 const describeAspectRatio = (width: number, height: number): string => {
   const divisor = greatestCommonDivisor(width, height);
@@ -194,7 +195,8 @@ const toText = (value: unknown): string | null => {
 };
 
 const toStringArray = (value: unknown): string[] => {
-  if (Array.isArray(value)) return value.map(toText).filter((entry): entry is string => entry !== null);
+  if (Array.isArray(value))
+    return value.map(toText).filter((entry): entry is string => entry !== null);
   const single = toText(value);
   return single ? [single] : [];
 };
@@ -340,7 +342,8 @@ const measurePixels = (
     if (alpha < PALETTE_MIN_ALPHA) continue;
 
     opaqueCount += 1;
-    luminanceSum += (0.2126 * data[index] + 0.7152 * data[index + 1] + 0.0722 * data[index + 2]) / 255;
+    luminanceSum +=
+      (0.2126 * data[index] + 0.7152 * data[index + 1] + 0.0722 * data[index + 2]) / 255;
   }
 
   return {
@@ -509,7 +512,8 @@ export const extractMetadata = async (input: ExtractMetadataInput): Promise<Imag
     aspectRatioLabel: describeAspectRatio(width, height),
     closestNamedRatio: describeClosestNamedRatio(width, height),
     megapixels: isVector ? null : Number((pixelCount / 1_000_000).toFixed(2)),
-    bytesPerPixel: isVector || pixelCount === 0 ? null : Number((file.size / pixelCount).toFixed(3)),
+    bytesPerPixel:
+      isVector || pixelCount === 0 ? null : Number((file.size / pixelCount).toFixed(3)),
     dpi,
 
     supportsAlphaChannel,

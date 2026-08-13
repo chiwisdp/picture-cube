@@ -3,28 +3,28 @@
   // each map directly to a Three.js class of the same name (`THREE.Mesh`,
   // `THREE.PerspectiveCamera`...). Threlte creates the Three.js object for you
   // and keeps its properties in sync with whatever props you pass.
-  import { T } from '@threlte/core'
+  import { T } from '@threlte/core';
   // Helper components from Threlte's companion "extras" package (the rough
   // equivalent of `@react-three/drei` for React Three Fiber).
-  import { OrbitControls, VirtualEnvironment, interactivity } from '@threlte/extras'
-  import * as THREE from 'three'
-  import PictureCube from './PictureCube.svelte'
+  import { OrbitControls, VirtualEnvironment, interactivity } from '@threlte/extras';
+  import * as THREE from 'three';
+  import PictureCube from './PictureCube.svelte';
 
   type Props = {
     /** Forwarded to the cube so it can scale up and light its rim during a drag. */
-    dragActive?: boolean
+    dragActive?: boolean;
     /** Forwarded to the cube so clicking it opens the same file picker as the "browse" link. */
-    onCubeClick?: () => void
-  }
+    onCubeClick?: () => void;
+  };
 
   // Svelte 5 "runes" syntax: `$props()` reads the props passed in from the
   // parent (`App.svelte`), and `= false` is the default if none is given.
-  let { dragActive = false, onCubeClick }: Props = $props()
+  let { dragActive = false, onCubeClick }: Props = $props();
 
   // Three.js doesn't fire pointer events (click/hover) by default — it just
   // draws pixels. Calling this once turns on Threlte's raycasting layer, which
   // is what lets `<PictureCube>` respond to `onpointerenter`/`onpointerleave`.
-  interactivity()
+  interactivity();
 </script>
 
 <!--
@@ -35,20 +35,11 @@
 
 <!-- The camera we look through. `makeDefault` tells Threlte's <Canvas> (in
      App.svelte) to render from this camera's point of view. -->
-<T.PerspectiveCamera
-  makeDefault
-  position={[3.5, 2.5, 4.5]}
-  fov={45}
->
+<T.PerspectiveCamera makeDefault position={[3.5, 2.5, 4.5]} fov={45}>
   <!-- Lets the user drag with the mouse to orbit the camera around `target`.
        Nested inside the camera because OrbitControls needs a camera to
        control — Threlte wires that up automatically from the parent. -->
-  <OrbitControls
-    enableDamping
-    target={[0, 0, 0]}
-    minDistance={3}
-    maxDistance={12}
-  />
+  <OrbitControls enableDamping target={[0, 0, 0]} minDistance={3} maxDistance={12} />
 </T.PerspectiveCamera>
 
 <!-- Lighting: without any light, materials like MeshStandardMaterial (used by
@@ -68,16 +59,10 @@
      its rays travel in one parallel direction, unlike a point light which
      radiates outward. `position` only sets which direction the light comes
      from, not how far away it "is". This one is the key/main light. -->
-<T.DirectionalLight
-  position={[5, 6, 4]}
-  intensity={1.3}
-/>
+<T.DirectionalLight position={[5, 6, 4]} intensity={1.3} />
 <!-- A second, dimmer directional light from roughly the opposite side, so the
      side facing away from the key light isn't pitch black. -->
-<T.DirectionalLight
-  position={[-4, -2, -3]}
-  intensity={0.3}
-/>
+<T.DirectionalLight position={[-4, -2, -3]} intensity={0.3} />
 
 <!--
   The cube's material is polished chrome (metalness 1, roughness 0.1 — see

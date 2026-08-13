@@ -9,6 +9,7 @@ Several places in the UI (the logo, buttons, panels) could use a consistent deco
 ### `src/lib/components/Frame.svelte`
 
 A wrapper component that:
+
 - Sizes itself to its content (`display: inline-block`), not a fixed box.
 - Renders its `children` snippet, padded by a `padding` prop (default `1rem`).
 - Draws one continuous outline around the padded content, with all four corners cut at a 45° angle instead of square or rounded, and a filled interior behind the content.
@@ -18,6 +19,7 @@ A wrapper component that:
 **Revision 2 (corner-shape plugin):** replaced the clip-path/nested-div approach entirely with the `@toolwind/corner-shape` Tailwind plugin (`@plugin '@toolwind/corner-shape';` in `app.css`), which exposes the CSS `corner-shape` property — `corner-shape: bevel` reshapes how `border-radius` rounds a corner into a 45° cut instead of a curve. Frame is back to a single element with a real `border` and per-corner `border-*-radius` values (bound to each corner's size prop): because the browser itself renders the border along the shaped corner boundary, there's no gap-at-the-diagonal failure mode to begin with — no clip-path, no nested elements, no approximated inset math. `corner-shape` is a very new CSS property; browsers without support simply ignore it, so the fallback is a normal rounded-corner border at the same radius rather than anything broken.
 
 **Props:**
+
 - `color?: string` — any valid CSS color, applied to the outline. Defaults to `var(--color-indigo-400)`, the same indigo accent already used for the rim glow and focus rings elsewhere in the app.
 - `background?: string` — any valid CSS color, fills the interior behind the content. Defaults to `var(--color-my-blue)`, the app's existing dark background token. Since Revision 2, this is a real element `background`, so `'transparent'` now genuinely works (unlike the old clip-path technique, where a transparent interior let the ring color bleed through) — the opaque default is kept for visual consistency with existing usage, not because transparency is broken.
 - `padding?: string` — CSS padding value between the content and the outline. Defaults to `1rem`.
@@ -37,6 +39,7 @@ A wrapper component that:
 ## Testing
 
 Manual verification (no test suite in this repo):
+
 - Wrapping arbitrary content (e.g. a short line of text) in `<Frame>` in a scratch usage renders one continuous, fully connected outline with all four corners visibly cut at an angle (no gaps at the diagonals), in the default indigo color, over the default dark interior fill, sized to the content plus `1rem` padding.
 - Passing `color` changes the outline color; `background` changes the interior fill; `padding` changes the gap between content and the outline; `cornerSize` changes how big the angled cut is; `borderWidth` changes the outline's thickness.
 - Setting one of `topLeftCorner`/`topRightCorner`/`bottomRightCorner`/`bottomLeftCorner` to `'0'` makes just that corner square while the other three stay chamfered at `cornerSize`, with no gap at that corner either.

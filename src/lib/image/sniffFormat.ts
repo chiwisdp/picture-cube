@@ -201,9 +201,7 @@ export const formatFromFileName = (fileName: string): SourceFormat => {
   const lastDot = fileName.lastIndexOf('.');
   if (lastDot < 0) return 'unknown';
   const extension = fileName.slice(lastDot).toLowerCase();
-  const match = sourceFormats.find((format) =>
-    sourceFormatExtensions[format].includes(extension),
-  );
+  const match = sourceFormats.find((format) => sourceFormatExtensions[format].includes(extension));
   return match ?? 'unknown';
 };
 

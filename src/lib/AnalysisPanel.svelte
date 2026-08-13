@@ -1,47 +1,47 @@
 <script lang="ts">
-  import { Motion } from 'svelte-motion'
-  import type { RoleFit, TechnicalIssue } from './analysis/schema'
-  import type { WebRole } from './analysis/webRoles'
-  import { getWebRole, webRoleList } from './analysis/webRoles'
-  import type { DroppedImage } from './image/store.svelte'
-  import { imageStatusLabels, imageStore } from './image/store.svelte'
-  import type { ExifSummary, ImageMetadata } from './image/extractMetadata'
-  import { sourceFormatLabels } from './image/sniffFormat'
-  import { DEFAULT_FOCAL_POINT } from './image/cropForRole'
-  import RolePreview from './RolePreview.svelte'
+  import { Motion } from 'svelte-motion';
+  import type { RoleFit, TechnicalIssue } from './analysis/schema';
+  import type { WebRole } from './analysis/webRoles';
+  import { getWebRole, webRoleList } from './analysis/webRoles';
+  import type { DroppedImage } from './image/store.svelte';
+  import { imageStatusLabels, imageStore } from './image/store.svelte';
+  import type { ExifSummary, ImageMetadata } from './image/extractMetadata';
+  import { sourceFormatLabels } from './image/sniffFormat';
+  import { DEFAULT_FOCAL_POINT } from './image/cropForRole';
+  import RolePreview from './RolePreview.svelte';
 
-  type PanelTab = 'metadata' | 'uses' | 'edits'
+  type PanelTab = 'metadata' | 'uses' | 'edits';
 
-  type DetailRow = { label: string; value: string }
+  type DetailRow = { label: string; value: string };
 
   /** One row of the Uses tab. `fit` is null when no analysis has scored it. */
-  type RoleEntry = { role: WebRole; fit: RoleFit | null }
+  type RoleEntry = { role: WebRole; fit: RoleFit | null };
 
   const tabs: readonly { id: PanelTab; label: string }[] = [
     { id: 'metadata', label: 'Metadata' },
     { id: 'uses', label: 'Uses' },
-    { id: 'edits', label: 'Edits' }
-  ]
+    { id: 'edits', label: 'Edits' },
+  ];
 
   const severityClasses: Record<TechnicalIssue['severity'], string> = {
     low: 'border-neutral-500/40 bg-neutral-500/10 text-neutral-300',
     medium: 'border-amber-400/40 bg-amber-400/10 text-amber-200',
-    high: 'border-rose-500/40 bg-rose-500/10 text-rose-200'
-  }
+    high: 'border-rose-500/40 bg-rose-500/10 text-rose-200',
+  };
 
   const statusClasses: Record<DroppedImage['status'], string> = {
     decoding: 'border-amber-400/40 bg-amber-400/10 text-amber-200',
     queued: 'border-white/15 bg-white/5 text-neutral-300',
     analyzing: 'border-indigo-400/40 bg-indigo-400/10 text-indigo-200',
     done: 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200',
-    error: 'border-rose-500/40 bg-rose-500/10 text-rose-200'
-  }
+    error: 'border-rose-500/40 bg-rose-500/10 text-rose-200',
+  };
 
   const fitBarClasses = (score: number): string => {
-    if (score >= 70) return 'bg-emerald-400'
-    if (score >= 40) return 'bg-amber-400'
-    return 'bg-rose-500'
-  }
+    if (score >= 70) return 'bg-emerald-400';
+    if (score >= 40) return 'bg-amber-400';
+    return 'bg-rose-500';
+  };
 
   const buildMetadataRows = (metadata: ImageMetadata): DetailRow[] => {
     const rows: DetailRow[] = [
@@ -50,20 +50,20 @@
       { label: 'Ratio', value: metadata.aspectRatioLabel },
       { label: 'Closest named', value: metadata.closestNamedRatio },
       { label: 'Orientation', value: metadata.orientationClass },
-      { label: 'File size', value: metadata.fileSizeLabel }
-    ]
+      { label: 'File size', value: metadata.fileSizeLabel },
+    ];
 
     if (metadata.megapixels !== null) {
-      rows.push({ label: 'Megapixels', value: `${metadata.megapixels} MP` })
+      rows.push({ label: 'Megapixels', value: `${metadata.megapixels} MP` });
     }
     if (metadata.bytesPerPixel !== null) {
-      rows.push({ label: 'Bytes / pixel', value: metadata.bytesPerPixel.toFixed(3) })
+      rows.push({ label: 'Bytes / pixel', value: metadata.bytesPerPixel.toFixed(3) });
     }
     if (metadata.dpi) {
       rows.push({
         label: 'Resolution',
-        value: `${metadata.dpi.x} × ${metadata.dpi.y} DPI (${metadata.dpi.source})`
-      })
+        value: `${metadata.dpi.x} × ${metadata.dpi.y} DPI (${metadata.dpi.source})`,
+      });
     }
 
     rows.push({
@@ -72,16 +72,16 @@
         ? `${Math.round(metadata.transparentPixelRatio * 100)}% of pixels`
         : metadata.supportsAlphaChannel
           ? 'None used'
-          : 'Not supported'
-    })
+          : 'Not supported',
+    });
     rows.push({
       label: 'Avg luminance',
-      value: `${Math.round(metadata.averageLuminance * 100)}%`
-    })
-    rows.push({ label: 'Decoded via', value: metadata.decodedVia })
+      value: `${Math.round(metadata.averageLuminance * 100)}%`,
+    });
+    rows.push({ label: 'Decoded via', value: metadata.decodedVia });
 
-    return rows
-  }
+    return rows;
+  };
 
   const buildExifRows = (exif: ExifSummary): DetailRow[] => {
     const candidates: DetailRow[] = [
@@ -97,45 +97,43 @@
       { label: 'Artist', value: exif.artist ?? '' },
       { label: 'Copyright', value: exif.copyright ?? '' },
       { label: 'Keywords', value: exif.keywords.join(', ') },
-      { label: 'GPS', value: exif.hasGpsCoordinates ? 'Coordinates embedded' : '' }
-    ]
+      { label: 'GPS', value: exif.hasGpsCoordinates ? 'Coordinates embedded' : '' },
+    ];
 
-    return candidates.filter((row) => row.value.trim().length > 0)
-  }
+    return candidates.filter((row) => row.value.trim().length > 0);
+  };
 
   const sortByFit = (fits: readonly RoleFit[]): RoleFit[] =>
-    [...fits].sort((a, b) => b.fitScore - a.fitScore)
+    [...fits].sort((a, b) => b.fitScore - a.fitScore);
 
-  let tab = $state<PanelTab>('metadata')
-  let expandedRoleId = $state<string | null>(null)
-  let altTextCopied = $state(false)
-  let lastImage = $state<DroppedImage | null>(null)
+  let tab = $state<PanelTab>('metadata');
+  let expandedRoleId = $state<string | null>(null);
+  let altTextCopied = $state(false);
+  let lastImage = $state<DroppedImage | null>(null);
 
   // Held through the slide-out so the panel is not empty while it animates away.
   $effect(() => {
-    const current = imageStore.selected
+    const current = imageStore.selected;
     if (current) {
-      lastImage = current
-      return
+      lastImage = current;
+      return;
     }
-    const previous = lastImage
+    const previous = lastImage;
     if (previous && !imageStore.images.some((image) => image.id === previous.id)) {
-      lastImage = null
+      lastImage = null;
     }
-  })
+  });
 
   $effect(() => {
-    void imageStore.selectedId
-    expandedRoleId = null
-    altTextCopied = false
-  })
+    void imageStore.selectedId;
+    expandedRoleId = null;
+    altTextCopied = false;
+  });
 
-  let isOpen = $derived(imageStore.selected !== null)
-  let image = $derived(imageStore.selected ?? lastImage)
-  let analysis = $derived(image?.analysis ?? null)
-  let isPending = $derived(
-    image !== null && analysis === null && image.status !== 'error'
-  )
+  let isOpen = $derived(imageStore.selected !== null);
+  let image = $derived(imageStore.selected ?? lastImage);
+  let analysis = $derived(image?.analysis ?? null);
+  let isPending = $derived(image !== null && analysis === null && image.status !== 'error');
   /**
    * Every role is listed either way. Cropping only needs a focal point, and
    * there is a sensible default for that, so the crop tools stay available
@@ -143,43 +141,43 @@
    * OPENROUTER_API_KEY is configured.
    */
   let roleEntries = $derived.by<RoleEntry[]>(() => {
-    if (!analysis) return webRoleList.map((role) => ({ role, fit: null }))
-    return sortByFit(analysis.roleFits).map((fit) => ({ role: getWebRole(fit.roleId), fit }))
-  })
+    if (!analysis) return webRoleList.map((role) => ({ role, fit: null }));
+    return sortByFit(analysis.roleFits).map((fit) => ({ role: getWebRole(fit.roleId), fit }));
+  });
 
-  let focalPoint = $derived(analysis?.focalPoint ?? DEFAULT_FOCAL_POINT)
+  let focalPoint = $derived(analysis?.focalPoint ?? DEFAULT_FOCAL_POINT);
 
   const handleClose = (): void => {
-    imageStore.deselect()
-  }
+    imageStore.deselect();
+  };
 
   const handleTab = (next: PanelTab): void => {
-    tab = next
-  }
+    tab = next;
+  };
 
   const handleToggleRole = (roleId: string): void => {
-    expandedRoleId = expandedRoleId === roleId ? null : roleId
-  }
+    expandedRoleId = expandedRoleId === roleId ? null : roleId;
+  };
 
   const handleRetry = (): void => {
-    if (!image) return
-    imageStore.retryAnalysis(image.id)
-  }
+    if (!image) return;
+    imageStore.retryAnalysis(image.id);
+  };
 
   const handleCopyAltText = async (): Promise<void> => {
-    const text = analysis?.accessibility.suggestedAltText ?? ''
-    if (text.length === 0) return
+    const text = analysis?.accessibility.suggestedAltText ?? '';
+    if (text.length === 0) return;
 
     try {
-      await navigator.clipboard.writeText(text)
-      altTextCopied = true
+      await navigator.clipboard.writeText(text);
+      altTextCopied = true;
       setTimeout(() => {
-        altTextCopied = false
-      }, 1600)
+        altTextCopied = false;
+      }, 1600);
     } catch {
-      altTextCopied = false
+      altTextCopied = false;
     }
-  }
+  };
 </script>
 
 <Motion
@@ -196,7 +194,7 @@
     class={[
       'absolute top-0 right-0 z-30 flex w-[27rem] max-w-[92vw] flex-col border-l border-white/10 bg-[#101018]/95 backdrop-blur-xl',
       imageStore.hasImages ? 'bottom-28' : 'bottom-0',
-      isOpen ? 'pointer-events-auto' : 'pointer-events-none'
+      isOpen ? 'pointer-events-auto' : 'pointer-events-none',
     ]}
   >
     {#if image}
@@ -232,7 +230,7 @@
           <span
             class={[
               'rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] uppercase',
-              statusClasses[image.status]
+              statusClasses[image.status],
             ]}
           >
             {imageStatusLabels[image.status]}
@@ -264,7 +262,10 @@
       <div class="min-h-0 flex-1 overflow-y-auto">
         {#if image.status === 'error'}
           <div class="space-y-3 px-5 py-5">
-            <p class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200" role="alert">
+            <p
+              class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"
+              role="alert"
+            >
               {image.error}
             </p>
             {#if image.bitmap}
@@ -317,7 +318,7 @@
                 'rounded-full px-3 py-1.5 text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none',
                 tab === entry.id
                   ? 'bg-indigo-500/20 text-indigo-100'
-                  : 'text-neutral-500 hover:text-neutral-200'
+                  : 'text-neutral-500 hover:text-neutral-200',
               ]}
               onclick={() => handleTab(entry.id)}
             >
@@ -426,7 +427,9 @@
                 </p>
               </section>
             {:else if image.bitmap}
-              <p class="mb-5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-relaxed text-neutral-400">
+              <p
+                class="mb-5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-relaxed text-neutral-400"
+              >
                 No analysis for this image, so there are no fit scores. Every crop below is still
                 generated for real, centred on the middle of the image.
               </p>
@@ -443,7 +446,7 @@
                     <div class="flex items-baseline justify-between gap-3">
                       <h3 class="text-sm font-semibold text-neutral-50">{role.label}</h3>
                       {#if fit}
-                        <span class="text-xs tabular-nums text-neutral-400">
+                        <span class="text-xs text-neutral-400 tabular-nums">
                           {fit.fitScore}<span class="text-neutral-600">/100</span>
                         </span>
                       {/if}

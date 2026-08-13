@@ -86,7 +86,9 @@ export const overlayTextSafeZoneSchema = z
       .describe('Text colour that would hold contrast against that region.'),
     rationale: z
       .string()
-      .describe('One sentence on why that region works, or why nothing does when region is "none".'),
+      .describe(
+        'One sentence on why that region works, or why nothing does when region is "none".',
+      ),
   })
   .describe('Where text can be laid over this image, for hero and banner use.');
 
@@ -98,12 +100,12 @@ export const roleFitSchema = z.object({
     .min(0)
     .max(100)
     .describe(
-      'How well the image suits this slot, 0 to 100. Judge the composition against the slot\'s aspect ratio and display size, and spread scores out rather than clustering everything in the 60s and 70s.',
+      "How well the image suits this slot, 0 to 100. Judge the composition against the slot's aspect ratio and display size, and spread scores out rather than clustering everything in the 60s and 70s.",
     ),
   rationale: z
     .string()
     .describe(
-      'One or two sentences on why it scores that way, referencing the crop this slot\'s ratio would force.',
+      "One or two sentences on why it scores that way, referencing the crop this slot's ratio would force.",
     ),
   requiredEdits: z
     .array(z.string())

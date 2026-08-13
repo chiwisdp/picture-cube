@@ -22,9 +22,11 @@
 ### Task 1: Strip image texturing and face-click out of PictureCube
 
 **Files:**
+
 - Modify: `src/lib/PictureCube.svelte` (full rewrite of the `<script>` block and template)
 
 **Interfaces:**
+
 - Consumes: nothing new — keeps its existing `Props = { dragActive?: boolean }` signature, unchanged from today.
 - Produces: a `PictureCube` component with the same public prop (`dragActive`) but no more `imageStore` dependency. `Scene.svelte` (Task 2) continues to render it as `<PictureCube {dragActive} />` with no interface change.
 
@@ -32,93 +34,96 @@
 
 ```svelte
 <script lang="ts">
-  import { T } from '@threlte/core'
-  import gsap from 'gsap'
-  import { untrack } from 'svelte'
-  import * as THREE from 'three'
+  import { T } from '@threlte/core';
+  import gsap from 'gsap';
+  import { untrack } from 'svelte';
+  import * as THREE from 'three';
 
   type Props = {
     /** True while a file drag is over the window. Scales the cube and lights the rim. */
-    dragActive?: boolean
-  }
+    dragActive?: boolean;
+  };
 
-  let { dragActive = false }: Props = $props()
+  let { dragActive = false }: Props = $props();
 
-  const TWO_PI = Math.PI * 2
+  const TWO_PI = Math.PI * 2;
 
-  let group = $state<THREE.Group>()
-  let idleSpin = $state<gsap.core.Tween>()
-  let hovered = $state(false)
-  let rimGlow = $state(0)
+  let group = $state<THREE.Group>();
+  let idleSpin = $state<gsap.core.Tween>();
+  let hovered = $state(false);
+  let rimGlow = $state(0);
 
   const handlePointerEnter = (): void => {
-    hovered = true
-  }
+    hovered = true;
+  };
 
   const handlePointerLeave = (): void => {
-    hovered = false
-  }
+    hovered = false;
+  };
 
   $effect(() => {
-    if (!group) return
+    if (!group) return;
 
     const entrance = gsap.from(group.rotation, {
       y: TWO_PI,
       x: Math.PI * 0.4,
       duration: 1.6,
-      ease: 'power3.out'
-    })
+      ease: 'power3.out',
+    });
     const spin = gsap.to(group.rotation, {
       y: '+=' + TWO_PI,
       duration: 26,
       repeat: -1,
-      ease: 'none'
-    })
-    idleSpin = spin
+      ease: 'none',
+    });
+    idleSpin = spin;
 
     return () => {
-      entrance.kill()
-      spin.kill()
-    }
-  })
+      entrance.kill();
+      spin.kill();
+    };
+  });
 
   $effect(() => {
-    if (!idleSpin) return
-    const shouldSpin = !dragActive && !hovered
+    if (!idleSpin) return;
+    const shouldSpin = !dragActive && !hovered;
     if (shouldSpin) {
-      idleSpin.play()
-      return
+      idleSpin.play();
+      return;
     }
-    idleSpin.pause()
-  })
+    idleSpin.pause();
+  });
 
   $effect(() => {
-    if (!group) return
-    const scale = dragActive ? 1.16 : hovered ? 1.06 : 1
-    const tween = gsap.to(group.scale, { x: scale, y: scale, z: scale, duration: 0.35, ease: 'power2.out' })
-    return () => tween.kill()
-  })
+    if (!group) return;
+    const scale = dragActive ? 1.16 : hovered ? 1.06 : 1;
+    const tween = gsap.to(group.scale, {
+      x: scale,
+      y: scale,
+      z: scale,
+      duration: 0.35,
+      ease: 'power2.out',
+    });
+    return () => tween.kill();
+  });
 
   $effect(() => {
-    const target = dragActive ? 0.4 : 0
-    const value = { opacity: untrack(() => rimGlow) }
+    const target = dragActive ? 0.4 : 0;
+    const value = { opacity: untrack(() => rimGlow) };
     const tween = gsap.to(value, {
       opacity: target,
       duration: 0.35,
       ease: 'power2.out',
       onUpdate: () => {
-        rimGlow = value.opacity
-      }
-    })
-    return () => tween.kill()
-  })
+        rimGlow = value.opacity;
+      },
+    });
+    return () => tween.kill();
+  });
 </script>
 
 <T.Group bind:ref={group}>
-  <T.Mesh
-    onpointerenter={handlePointerEnter}
-    onpointerleave={handlePointerLeave}
-  >
+  <T.Mesh onpointerenter={handlePointerEnter} onpointerleave={handlePointerLeave}>
     <T.BoxGeometry args={[2, 2, 2]} />
     <T.MeshStandardMaterial metalness={1} roughness={0.1} />
   </T.Mesh>
@@ -156,9 +161,11 @@ git commit -m "Replace per-face image textures with a single polished-chrome mat
 ### Task 2: Add a procedural VirtualEnvironment so the chrome has reflections
 
 **Files:**
+
 - Modify: `src/lib/Scene.svelte` (imports and template)
 
 **Interfaces:**
+
 - Consumes: `PictureCube` from Task 1 (same `{ dragActive }` usage as before — no change to how `Scene.svelte` invokes it).
 - Produces: nothing new consumed by other tasks.
 
@@ -169,18 +176,15 @@ git commit -m "Replace per-face image textures with a single polished-chrome mat
 In `src/lib/Scene.svelte`, change:
 
 ```svelte
-  import { T } from '@threlte/core'
-  import { OrbitControls, interactivity } from '@threlte/extras'
-  import PictureCube from './PictureCube.svelte'
+import {T} from '@threlte/core' import {(OrbitControls, interactivity)} from '@threlte/extras' import
+PictureCube from './PictureCube.svelte'
 ```
 
 to:
 
 ```svelte
-  import { T } from '@threlte/core'
-  import { OrbitControls, VirtualEnvironment, interactivity } from '@threlte/extras'
-  import * as THREE from 'three'
-  import PictureCube from './PictureCube.svelte'
+import {T} from '@threlte/core' import {(OrbitControls, VirtualEnvironment, interactivity)} from '@threlte/extras'
+import * as THREE from 'three' import PictureCube from './PictureCube.svelte'
 ```
 
 - [ ] **Step 2: Render the VirtualEnvironment**
@@ -219,10 +223,7 @@ In the template, after the two `T.DirectionalLight` elements and before `<Pictur
 So the tail of the template reads:
 
 ```svelte
-<T.DirectionalLight
-  position={[-4, -2, -3]}
-  intensity={0.3}
-/>
+<T.DirectionalLight position={[-4, -2, -3]} intensity={0.3} />
 
 <VirtualEnvironment resolution={256}>
   <!-- six planes as above -->
@@ -253,9 +254,11 @@ git commit -m "Add Environment preset so the cube's chrome material has reflecti
 ### Task 3: Fix the subtitle copy
 
 **Files:**
+
 - Modify: `src/App.svelte:50`
 
 **Interfaces:**
+
 - Consumes: nothing.
 - Produces: nothing consumed elsewhere.
 
@@ -264,17 +267,15 @@ git commit -m "Add Environment preset so the cube's chrome material has reflecti
 In `src/App.svelte`, change:
 
 ```svelte
-      <p class="mt-1 text-sm text-neutral-400">
-        Drop images to texture the cube &middot; click a face to analyse it
-      </p>
+<p class="mt-1 text-sm text-neutral-400">
+  Drop images to texture the cube &middot; click a face to analyse it
+</p>
 ```
 
 to:
 
 ```svelte
-      <p class="mt-1 text-sm text-neutral-400">
-        Drop images to analyse them
-      </p>
+<p class="mt-1 text-sm text-neutral-400">Drop images to analyse them</p>
 ```
 
 - [ ] **Step 2: Type-check**

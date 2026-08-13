@@ -27,10 +27,7 @@ declare module 'utif2' {
   export function decode(buffer: ArrayBuffer | Uint8Array): UtifImageFileDirectory[];
 
   /** Decompresses one page in place, populating `width`, `height` and `data`. */
-  export function decodeImage(
-    buffer: ArrayBuffer | Uint8Array,
-    ifd: UtifImageFileDirectory,
-  ): void;
+  export function decodeImage(buffer: ArrayBuffer | Uint8Array, ifd: UtifImageFileDirectory): void;
 
   /** Converts a decoded page to 8-bit RGBA, ready for `ImageData`. */
   export function toRGBA8(ifd: UtifImageFileDirectory): Uint8Array;

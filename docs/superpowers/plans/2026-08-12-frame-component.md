@@ -24,9 +24,11 @@
 ### Task 1: Create the Frame component
 
 **Files:**
+
 - Create: `src/lib/components/Frame.svelte`
 
 **Interfaces:**
+
 - Consumes: nothing from elsewhere in the codebase.
 - Produces: a default-exported Svelte component usable as `<Frame color="..." padding="..." cornerSize="..." borderWidth="...">...</Frame>`, for any future caller to import from `./lib/components/Frame.svelte`.
 
@@ -34,33 +36,33 @@
 
 ```svelte
 <script lang="ts">
-  import type { Snippet } from 'svelte'
+  import type { Snippet } from 'svelte';
 
   type Props = {
     /** Any valid CSS color for the outline. */
-    color?: string
+    color?: string;
     /** Space between the content and the outline. */
-    padding?: string
+    padding?: string;
     /** Size of the angled cut at each corner (CSS length). */
-    cornerSize?: string
+    cornerSize?: string;
     /** Thickness of the outline. */
-    borderWidth?: string
-    children: Snippet
-  }
+    borderWidth?: string;
+    children: Snippet;
+  };
 
   let {
     color = 'var(--color-indigo-400)',
     padding = '1rem',
     cornerSize = '0.75rem',
     borderWidth = '2px',
-    children
-  }: Props = $props()
+    children,
+  }: Props = $props();
 
   // Chamfers all four corners by `cornerSize`. Percentages/calc() are relative
   // to this element's own box, so the same polygon works at any size.
   let clipPath = $derived(
-    `polygon(${cornerSize} 0, calc(100% - ${cornerSize}) 0, 100% ${cornerSize}, 100% calc(100% - ${cornerSize}), calc(100% - ${cornerSize}) 100%, ${cornerSize} 100%, 0 calc(100% - ${cornerSize}), 0 ${cornerSize})`
-  )
+    `polygon(${cornerSize} 0, calc(100% - ${cornerSize}) 0, 100% ${cornerSize}, 100% calc(100% - ${cornerSize}), calc(100% - ${cornerSize}) 100%, ${cornerSize} 100%, 0 calc(100% - ${cornerSize}), 0 ${cornerSize})`,
+  );
 </script>
 
 <div
@@ -91,7 +93,7 @@ Temporarily add this line inside `<main>` in `src/App.svelte` (e.g. right after 
 with the import added to the `<script>` block:
 
 ```ts
-import Frame from './lib/components/Frame.svelte'
+import Frame from './lib/components/Frame.svelte';
 ```
 
 Run `npm run dev` (or use the already-running dev server) and open the local URL. Expected: a box with "Frame test" inside it, with one continuous indigo outline around it whose four corners are visibly cut at a 45° angle (not square, not rounded).
@@ -110,9 +112,11 @@ git commit -m "Add reusable chamfered-corner Frame component"
 ### Task 2: Fix disconnected corners with a two-layer ring
 
 **Files:**
+
 - Modify: `src/lib/components/Frame.svelte` (full rewrite of the file)
 
 **Interfaces:**
+
 - Consumes: nothing new.
 - Produces: same component name/usage as Task 1, plus a new `background?: string` prop. Existing callers (there are none yet) passing `color`, `padding`, `cornerSize`, `borderWidth` continue to work unchanged.
 
@@ -120,21 +124,21 @@ git commit -m "Add reusable chamfered-corner Frame component"
 
 ```svelte
 <script lang="ts">
-  import type { Snippet } from 'svelte'
+  import type { Snippet } from 'svelte';
 
   type Props = {
     /** Any valid CSS color for the outline. */
-    color?: string
+    color?: string;
     /** Any valid CSS color for the interior, behind the content. */
-    background?: string
+    background?: string;
     /** Space between the content and the outline. */
-    padding?: string
+    padding?: string;
     /** Size of the angled cut at each corner (CSS length). */
-    cornerSize?: string
+    cornerSize?: string;
     /** Thickness of the outline. */
-    borderWidth?: string
-    children: Snippet
-  }
+    borderWidth?: string;
+    children: Snippet;
+  };
 
   let {
     color = 'var(--color-indigo-400)',
@@ -142,31 +146,26 @@ git commit -m "Add reusable chamfered-corner Frame component"
     padding = '1rem',
     cornerSize = '0.75rem',
     borderWidth = '2px',
-    children
-  }: Props = $props()
+    children,
+  }: Props = $props();
 
   // Builds a chamfered-octagon polygon for a box of the given corner-cut
   // size. Percentages/calc() are relative to the element's own box, so the
   // same formula works at any size.
   const chamfer = (size: string) =>
-    `polygon(${size} 0, calc(100% - ${size}) 0, 100% ${size}, 100% calc(100% - ${size}), calc(100% - ${size}) 100%, ${size} 100%, 0 calc(100% - ${size}), 0 ${size})`
+    `polygon(${size} 0, calc(100% - ${size}) 0, 100% ${size}, 100% calc(100% - ${size}), calc(100% - ${size}) 100%, ${size} 100%, 0 calc(100% - ${size}), 0 ${size})`;
 
   // Outer layer is the ring color, clipped to the full chamfer.
-  let outerClip = $derived(chamfer(cornerSize))
+  let outerClip = $derived(chamfer(cornerSize));
   // Inner layer sits inset by borderWidth (via margin, below), so its own
   // corner cut is approximated as cornerSize minus that inset — this keeps
   // the ring a roughly even width all the way round, including the
   // diagonals, without needing a pixel-perfect mitered offset.
-  let innerClip = $derived(chamfer(`calc(${cornerSize} - ${borderWidth})`))
+  let innerClip = $derived(chamfer(`calc(${cornerSize} - ${borderWidth})`));
 </script>
 
 <div class="inline-block" style:clip-path={outerClip} style:background={color}>
-  <div
-    style:margin={borderWidth}
-    style:padding
-    style:clip-path={innerClip}
-    style:background
-  >
+  <div style:margin={borderWidth} style:padding style:clip-path={innerClip} style:background>
     {@render children()}
   </div>
 </div>
@@ -188,7 +187,7 @@ Temporarily add this line inside `<main>` in `src/App.svelte` (e.g. right after 
 ```
 
 ```ts
-import Frame from './lib/components/Frame.svelte'
+import Frame from './lib/components/Frame.svelte';
 ```
 
 Run `npm run dev` (or use the already-running dev server) and open the local URL. Expected: a box with "Frame test" inside it, with one continuous indigo outline around it whose four corners are visibly cut at a 45° angle — critically, **the outline must be fully connected all the way around, with no gap or break at any of the four diagonal cuts** (this is the bug this task fixes). The interior behind "Frame test" should show the dark `background` fill color, not the page's own background bleeding through.
@@ -207,9 +206,11 @@ git commit -m "Fix Frame outline gaps at chamfered corners with a two-layer ring
 ### Task 3: Per-corner control
 
 **Files:**
+
 - Modify: `src/lib/components/Frame.svelte` (full rewrite of the file)
 
 **Interfaces:**
+
 - Consumes: nothing new.
 - Produces: same component name/usage as Task 2, plus four new optional props (`topLeftCorner`, `topRightCorner`, `bottomRightCorner`, `bottomLeftCorner`). Existing callers passing only `cornerSize` continue to work unchanged — each new prop defaults to `cornerSize`.
 
@@ -217,29 +218,29 @@ git commit -m "Fix Frame outline gaps at chamfered corners with a two-layer ring
 
 ```svelte
 <script lang="ts">
-  import type { Snippet } from 'svelte'
+  import type { Snippet } from 'svelte';
 
   type Props = {
     /** Any valid CSS color for the outline. */
-    color?: string
+    color?: string;
     /** Any valid CSS color for the interior, behind the content. */
-    background?: string
+    background?: string;
     /** Space between the content and the outline. */
-    padding?: string
+    padding?: string;
     /** Default size of the angled cut at each corner (CSS length). */
-    cornerSize?: string
+    cornerSize?: string;
     /** Thickness of the outline. */
-    borderWidth?: string
+    borderWidth?: string;
     /** Overrides `cornerSize` for just the top-left corner. Use '0' for a square (non-angled) corner. */
-    topLeftCorner?: string
+    topLeftCorner?: string;
     /** Overrides `cornerSize` for just the top-right corner. Use '0' for a square (non-angled) corner. */
-    topRightCorner?: string
+    topRightCorner?: string;
     /** Overrides `cornerSize` for just the bottom-right corner. Use '0' for a square (non-angled) corner. */
-    bottomRightCorner?: string
+    bottomRightCorner?: string;
     /** Overrides `cornerSize` for just the bottom-left corner. Use '0' for a square (non-angled) corner. */
-    bottomLeftCorner?: string
-    children: Snippet
-  }
+    bottomLeftCorner?: string;
+    children: Snippet;
+  };
 
   let {
     color = 'var(--color-indigo-400)',
@@ -251,18 +252,20 @@ git commit -m "Fix Frame outline gaps at chamfered corners with a two-layer ring
     topRightCorner = cornerSize,
     bottomRightCorner = cornerSize,
     bottomLeftCorner = cornerSize,
-    children
-  }: Props = $props()
+    children,
+  }: Props = $props();
 
   // Builds a chamfered-octagon polygon from each corner's own cut size.
   // Percentages/calc() are relative to the element's own box, so the same
   // formula works at any size. A corner size of 0 collapses that corner's
   // two vertices onto one point — i.e. a plain square corner.
   const chamfer = (tl: string, tr: string, br: string, bl: string) =>
-    `polygon(${tl} 0, calc(100% - ${tr}) 0, 100% ${tr}, 100% calc(100% - ${br}), calc(100% - ${br}) 100%, ${bl} 100%, 0 calc(100% - ${bl}), 0 ${tl})`
+    `polygon(${tl} 0, calc(100% - ${tr}) 0, 100% ${tr}, 100% calc(100% - ${br}), calc(100% - ${br}) 100%, ${bl} 100%, 0 calc(100% - ${bl}), 0 ${tl})`;
 
   // Outer layer is the ring color, clipped to the full chamfer.
-  let outerClip = $derived(chamfer(topLeftCorner, topRightCorner, bottomRightCorner, bottomLeftCorner))
+  let outerClip = $derived(
+    chamfer(topLeftCorner, topRightCorner, bottomRightCorner, bottomLeftCorner),
+  );
 
   // Inner layer sits inset by borderWidth (via margin, below), so each of its
   // own corner cuts is approximated as that corner's size minus the inset —
@@ -276,19 +279,19 @@ git commit -m "Fix Frame outline gaps at chamfered corners with a two-layer ring
   // leaving a gap. Two independently clipped filled layers don't have that
   // problem — the ring is a real shape, not a border trying to trace a
   // boundary it can't see.
-  const inset = (size: string) => `max(0px, calc(${size} - ${borderWidth}))`
+  const inset = (size: string) => `max(0px, calc(${size} - ${borderWidth}))`;
   let innerClip = $derived(
-    chamfer(inset(topLeftCorner), inset(topRightCorner), inset(bottomRightCorner), inset(bottomLeftCorner))
-  )
+    chamfer(
+      inset(topLeftCorner),
+      inset(topRightCorner),
+      inset(bottomRightCorner),
+      inset(bottomLeftCorner),
+    ),
+  );
 </script>
 
 <div class="inline-block" style:clip-path={outerClip} style:background={color}>
-  <div
-    style:margin={borderWidth}
-    style:padding
-    style:clip-path={innerClip}
-    style:background
-  >
+  <div style:margin={borderWidth} style:padding style:clip-path={innerClip} style:background>
     {@render children()}
   </div>
 </div>
@@ -321,11 +324,13 @@ git commit -m "Add per-corner control to Frame, so each corner can be square or 
 ### Task 4: Switch to the corner-shape CSS property via @toolwind/corner-shape
 
 **Files:**
+
 - Modify: `package.json` (new dependency, via `npm install`)
 - Modify: `src/app.css` (add the plugin directive)
 - Modify: `src/lib/components/Frame.svelte` (full rewrite of the file)
 
 **Interfaces:**
+
 - Consumes: the `@toolwind/corner-shape` Tailwind plugin, which must be registered in `app.css` before Frame's `corner-bevel` class has any effect.
 - Produces: same component name/props as Task 3 — no prop changes, just an internal rewrite. Existing/future callers are unaffected.
 
@@ -351,29 +356,29 @@ Add the `@plugin` line immediately after the existing `@import 'tailwindcss';` (
 
 ```svelte
 <script lang="ts">
-  import type { Snippet } from 'svelte'
+  import type { Snippet } from 'svelte';
 
   type Props = {
     /** Any valid CSS color for the outline. */
-    color?: string
+    color?: string;
     /** Any valid CSS color for the interior, behind the content. */
-    background?: string
+    background?: string;
     /** Space between the content and the outline. */
-    padding?: string
+    padding?: string;
     /** Default size of the angled cut at each corner (CSS length). */
-    cornerSize?: string
+    cornerSize?: string;
     /** Thickness of the outline. */
-    borderWidth?: string
+    borderWidth?: string;
     /** Overrides `cornerSize` for just the top-left corner. Use '0' for a square (non-angled) corner. */
-    topLeftCorner?: string
+    topLeftCorner?: string;
     /** Overrides `cornerSize` for just the top-right corner. Use '0' for a square (non-angled) corner. */
-    topRightCorner?: string
+    topRightCorner?: string;
     /** Overrides `cornerSize` for just the bottom-right corner. Use '0' for a square (non-angled) corner. */
-    bottomRightCorner?: string
+    bottomRightCorner?: string;
     /** Overrides `cornerSize` for just the bottom-left corner. Use '0' for a square (non-angled) corner. */
-    bottomLeftCorner?: string
-    children: Snippet
-  }
+    bottomLeftCorner?: string;
+    children: Snippet;
+  };
 
   let {
     color = 'var(--color-indigo-400)',
@@ -385,8 +390,8 @@ Add the `@plugin` line immediately after the existing `@import 'tailwindcss';` (
     topRightCorner = cornerSize,
     bottomRightCorner = cornerSize,
     bottomLeftCorner = cornerSize,
-    children
-  }: Props = $props()
+    children,
+  }: Props = $props();
 </script>
 
 <!--
@@ -402,7 +407,7 @@ Add the `@plugin` line immediately after the existing `@import 'tailwindcss';` (
   the same radius, not a broken/square one.
 -->
 <div
-  class="corner-bevel inline-block"
+  class="inline-block corner-bevel"
   style:padding
   style:border-width={borderWidth}
   style:border-color={color}

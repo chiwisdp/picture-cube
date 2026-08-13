@@ -87,12 +87,8 @@ export const computeCropRect = (
       ? source.height
       : clamp(Math.round(source.width / aspectRatio), 1, source.height);
 
-  const x = Math.round(
-    clamp(focalPoint.x * source.width - width / 2, 0, source.width - width),
-  );
-  const y = Math.round(
-    clamp(focalPoint.y * source.height - height / 2, 0, source.height - height),
-  );
+  const x = Math.round(clamp(focalPoint.x * source.width - width / 2, 0, source.width - width));
+  const y = Math.round(clamp(focalPoint.y * source.height - height / 2, 0, source.height - height));
 
   return { x, y, width, height };
 };
@@ -108,7 +104,10 @@ export const roleCropFileName = (
   crop: Pick<RoleCrop, 'format' | 'width' | 'height'>,
   sourceName = 'image',
 ): string => {
-  const stem = sourceName.replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '');
+  const stem = sourceName
+    .replace(/\.[^.]+$/, '')
+    .replace(/[^a-z0-9]+/gi, '-')
+    .replace(/^-|-$/g, '');
   const base = stem.length > 0 ? stem : 'image';
   return `${base}-${role.id}-${crop.width}x${crop.height}.${crop.format}`;
 };

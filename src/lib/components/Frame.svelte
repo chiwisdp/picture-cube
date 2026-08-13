@@ -1,29 +1,29 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte'
+  import type { Snippet } from 'svelte';
 
   type Props = {
     /** Any valid CSS color for the outline. */
-    color?: string
+    color?: string;
     /** Any valid CSS color for the interior, behind the content. */
-    background?: string
+    background?: string;
     /** Space between the content and the outline. */
-    padding?: string
+    padding?: string;
     /** Default size of the angled cut at each corner (CSS length). */
-    cornerSize?: string
+    cornerSize?: string;
     /** Thickness of the outline. */
-    borderWidth?: string
+    borderWidth?: string;
     /** Overrides `cornerSize` for just the top-left corner. Use '0' for a square (non-angled) corner. */
-    topLeftCorner?: string
+    topLeftCorner?: string;
     /** Overrides `cornerSize` for just the top-right corner. Use '0' for a square (non-angled) corner. */
-    topRightCorner?: string
+    topRightCorner?: string;
     /** Overrides `cornerSize` for just the bottom-right corner. Use '0' for a square (non-angled) corner. */
-    bottomRightCorner?: string
+    bottomRightCorner?: string;
     /** Overrides `cornerSize` for just the bottom-left corner. Use '0' for a square (non-angled) corner. */
-    bottomLeftCorner?: string
+    bottomLeftCorner?: string;
     /** Extra classes for the outline div. Defaults to `inline-block` (sized to content); pass e.g. `"block h-full w-full"` to fill the parent instead. */
-    class?: string
-    children: Snippet
-  }
+    class?: string;
+    children: Snippet;
+  };
 
   let {
     color = 'var(--color-white)',
@@ -36,8 +36,8 @@
     bottomRightCorner = cornerSize,
     bottomLeftCorner = cornerSize,
     class: className = 'inline-block',
-    children
-  }: Props = $props()
+    children,
+  }: Props = $props();
 </script>
 
 <!--
