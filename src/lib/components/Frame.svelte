@@ -20,12 +20,14 @@
     bottomRightCorner?: string
     /** Overrides `cornerSize` for just the bottom-left corner. Use '0' for a square (non-angled) corner. */
     bottomLeftCorner?: string
+    /** Extra classes for the outline div. Defaults to `inline-block` (sized to content); pass e.g. `"block h-full w-full"` to fill the parent instead. */
+    class?: string
     children: Snippet
   }
 
   let {
-    color = 'var(--color-indigo-400)',
-    background = 'var(--color-my-blue)',
+    color = 'var(--color-white)',
+    background = 'var(--color-white-0)',
     padding = '1rem',
     cornerSize = '0.75rem',
     borderWidth = '2px',
@@ -33,6 +35,7 @@
     topRightCorner = cornerSize,
     bottomRightCorner = cornerSize,
     bottomLeftCorner = cornerSize,
+    class: className = 'inline-block',
     children
   }: Props = $props()
 </script>
@@ -50,7 +53,7 @@
   the same radius, not a broken/square one.
 -->
 <div
-  class="corner-bevel inline-block"
+  class={`corner-bevel ${className}`}
   style:padding
   style:border-width={borderWidth}
   style:border-color={color}

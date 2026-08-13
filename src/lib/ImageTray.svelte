@@ -95,7 +95,7 @@
               title={image.error ?? image.fileName}
               aria-current={isSelected}
               class={[
-                'group relative flex w-[4.5rem] flex-col gap-1 rounded-lg border p-1 text-left transition focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none',
+                'group relative flex w-18 flex-col gap-1 rounded-lg border p-1 text-left transition focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none',
                 isSelected
                   ? 'border-indigo-400/80 bg-indigo-500/10'
                   : 'border-white/10 hover:border-white/25'

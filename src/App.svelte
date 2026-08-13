@@ -6,11 +6,28 @@
   import ImageTray from './lib/ImageTray.svelte'
   import Scene from './lib/Scene.svelte'
   import { imageStore } from './lib/image/store.svelte'
+  import Frame from './lib/components/Frame.svelte';
+  import LogoOverlay from './lib/LogoOverlay.svelte';
+  import { fileInputAccept } from './lib/image/sniffFormat'
 
   let dragActive = $state(false)
+  // Owned here (not DropLayer) because both DropLayer's "browse" link and the
+  // 3D cube's click need to open the same hidden file picker.
+  let fileInput = $state<HTMLInputElement>()
 
   const handleFiles = (files: File[]): void => {
     void imageStore.addFiles(files)
+  }
+
+  const handleBrowse = (): void => {
+    fileInput?.click()
+  }
+
+  const handleFileInputChange = (event: Event): void => {
+    const input = event.currentTarget as HTMLInputElement
+    if (input.files && input.files.length > 0) handleFiles(Array.from(input.files))
+    // Reset so re-picking the same file fires `change` again.
+    input.value = ''
   }
 
   const handlePrevPage = (): void => {
@@ -22,28 +39,33 @@
   }
 </script>
 
-<main class="relative h-screen w-screen overflow-hidden bg-[#0f0f14] text-neutral-100">
+<main class="relative h-screen w-screen overflow-hidden bg-my-blue text-neutral-100">
+  <input
+    bind:this={fileInput}
+    type="file"
+    multiple
+    accept={fileInputAccept}
+    aria-hidden="true"
+    tabindex="-1"
+    class="sr-only"
+    onchange={handleFileInputChange}
+  />
+
   <div class="absolute inset-0">
     <Canvas>
-      <Scene {dragActive} />
+      <Scene {dragActive} onCubeClick={handleBrowse} />
     </Canvas>
   </div>
 
-  <Motion
-    let:motion
-    initial={{ opacity: 0, y: -12 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6, ease: 'easeOut' }}
-  >
-    <div use:motion class="pointer-events-none absolute top-0 left-0 px-8 py-6">
-      <h1 class="m-0 text-2xl font-semibold tracking-tight">Picture Cube</h1>
-      <p class="mt-1 text-sm text-neutral-400">
-        Drop images to texture the cube &middot; click a face to analyse it
-      </p>
-    </div>
-  </Motion>
+<LogoOverlay />
 
-  <DropLayer bind:active={dragActive} hasImages={imageStore.hasImages} onFiles={handleFiles} />
+
+  <DropLayer
+    bind:active={dragActive}
+    hasImages={imageStore.hasImages}
+    onFiles={handleFiles}
+    onBrowse={handleBrowse}
+  />
 
   {#if imageStore.pageCount > 1}
     <Motion

@@ -147,7 +147,7 @@
         {/if}
         {#if overlayRect}
           <div
-            class="pointer-events-none absolute rounded-[2px] border-2 border-indigo-400"
+            class="pointer-events-none absolute rounded-xs border-2 border-indigo-400"
             style:left={overlayRect.left}
             style:top={overlayRect.top}
             style:width={overlayRect.width}
@@ -163,7 +163,7 @@
         Generated crop
       </figcaption>
       <div
-        class="relative flex min-h-[4.5rem] items-center justify-center overflow-hidden rounded-lg bg-[#1a1a24]"
+        class="relative flex min-h-18 items-center justify-center overflow-hidden rounded-lg bg-[#1a1a24]"
       >
         {#if crop}
           <img src={crop.url} alt={`${role.label} crop of ${sourceName}`} class="block w-full" />

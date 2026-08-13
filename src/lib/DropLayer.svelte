@@ -1,18 +1,17 @@
 <script lang="ts">
   import { Motion } from 'svelte-motion'
-  import { fileInputAccept } from './image/sniffFormat'
-
+  import { blink } from './motion/presets';// my animations
   type Props = {
     /** True while a file drag is over the window. Bindable so the cube can react. */
     active?: boolean
     /** Hides the empty-state hint once the queue has something in it. */
     hasImages?: boolean
     onFiles: (files: File[]) => void
+    /** Opens the shared file picker (owned by App.svelte, since the cube triggers it too). */
+    onBrowse: () => void
   }
 
-  let { active = $bindable(false), hasImages = false, onFiles }: Props = $props()
-
-  let fileInput = $state<HTMLInputElement>()
+  let { active = $bindable(false), hasImages = false, onFiles, onBrowse }: Props = $props()
 
   /**
    * `dragleave` fires every time the pointer crosses a child element, so the
@@ -66,16 +65,6 @@
     emitFiles(event.clipboardData?.files)
   }
 
-  const handleBrowse = (): void => {
-    fileInput?.click()
-  }
-
-  const handleInputChange = (event: Event): void => {
-    const input = event.currentTarget as HTMLInputElement
-    emitFiles(input.files)
-    // Reset so re-picking the same file fires `change` again.
-    input.value = ''
-  }
 </script>
 
 <svelte:window
@@ -88,17 +77,6 @@
   onpaste={handlePaste}
 />
 
-<input
-  bind:this={fileInput}
-  type="file"
-  multiple
-  accept={fileInputAccept}
-  aria-hidden="true"
-  tabindex="-1"
-  class="sr-only"
-  onchange={handleInputChange}
-/>
-
 <Motion
   let:motion
   initial={{ opacity: 0 }}
@@ -108,7 +86,7 @@
   <div
     use:motion
     aria-hidden={!active}
-    class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-[#0f0f14]/70 p-6 backdrop-blur-[2px]"
+    class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-abyss/70 p-6 backdrop-blur-[2px]"
   >
     <div
       class="flex h-full w-full items-center justify-center rounded-3xl border-2 border-dashed border-indigo-400/70"
@@ -118,45 +96,31 @@
   </div>
 </Motion>
 
-<!-- Anchored under the title, clear of the analysis panel on the right. -->
-<div class="absolute top-28 left-8 z-30">
-  <button
-    type="button"
-    tabindex="0"
-    aria-label="Add images from your computer"
-    class="rounded-full border border-white/15 bg-white/10 px-5 py-2.5 text-sm font-medium text-neutral-100 shadow-lg shadow-black/30 backdrop-blur transition hover:border-indigo-400/60 hover:bg-indigo-500/20 focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none"
-    onclick={handleBrowse}
-  >
-    Add images
-  </button>
-</div>
 
+<!-- this is the text  at bottom of the screen use blink-->
 {#if !hasImages}
   <Motion
-    let:motion
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
+    let:motion {...blink}
   >
     <div
       use:motion
       class="pointer-events-none absolute inset-x-0 bottom-16 z-20 flex flex-col items-center gap-2 text-center"
     >
-      <p class="text-sm font-medium text-neutral-300">
-        Drop images anywhere, paste from the clipboard, or
+    <p class="text-4xl font-headers text-white tracking-widest">[ FEED ME ]</p>
+      <p class="text-xs font-body text-white tracking-widest mt-8">
+       (+) Feed the cube images, paste, drag/drop,or
         <button
           type="button"
           tabindex="0"
           aria-label="Browse for images"
-          class="pointer-events-auto rounded-sm text-indigo-300 underline decoration-dotted underline-offset-4 transition hover:text-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none"
-          onclick={handleBrowse}
+          class="pointer-events-auto rounded-sm text-my-red underline  underline-offset-4 transition hover:text-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none"
+          onclick={onBrowse}
         >
           browse
         </button>
+        (+)
       </p>
-      <p class="text-xs text-neutral-500">
-        JPEG, PNG, GIF, WebP, AVIF, BMP, ICO, TIFF and SVG
-      </p>
+      
     </div>
   </Motion>
 {/if}
