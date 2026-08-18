@@ -192,7 +192,7 @@
     aria-hidden={!isOpen}
     inert={!isOpen}
     class={[
-      'absolute top-0 right-0 z-30 flex w-[27rem] max-w-[92vw] flex-col border-l border-white/10 bg-[#101018]/95 backdrop-blur-xl',
+      'absolute top-0 right-0 z-30 flex w-108 max-w-[92vw] flex-col border-l border-white/10 bg-[#101018]/95 backdrop-blur-xl',
       imageStore.hasImages ? 'bottom-28' : 'bottom-0',
       isOpen ? 'pointer-events-auto' : 'pointer-events-none',
     ]}
@@ -394,7 +394,7 @@
                           <dt class="text-[10px] tracking-[0.14em] text-neutral-500 uppercase">
                             {row.label}
                           </dt>
-                          <dd class="mt-0.5 text-sm break-words text-neutral-100">{row.value}</dd>
+                          <dd class="mt-0.5 text-sm warp-break-words text-neutral-100">{row.value}</dd>
                         </div>
                       {/each}
                     </dl>
@@ -409,7 +409,7 @@
           {#if tab === 'uses'}
             {#if analysis}
               <section
-                class="mb-5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs"
+                class="mb-5 rounded-xl border border-white/10 bg-white/3 px-4 py-3 text-xs"
               >
                 <h3 class="text-[10px] tracking-[0.14em] text-neutral-500 uppercase">
                   Text overlay
@@ -428,7 +428,7 @@
               </section>
             {:else if image.bitmap}
               <p
-                class="mb-5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-relaxed text-neutral-400"
+                class="mb-5 rounded-xl border border-white/10 bg-white/3 px-4 py-3 text-xs leading-relaxed text-neutral-400"
               >
                 No analysis for this image, so there are no fit scores. Every crop below is still
                 generated for real, centred on the middle of the image.
@@ -442,7 +442,7 @@
               <ul class="space-y-3">
                 {#each roleEntries as { role, fit } (role.id)}
                   {@const expanded = expandedRoleId === role.id}
-                  <li class="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                  <li class="rounded-xl border border-white/10 bg-white/3 p-3">
                     <div class="flex items-baseline justify-between gap-3">
                       <h3 class="text-sm font-semibold text-neutral-50">{role.label}</h3>
                       {#if fit}
@@ -542,7 +542,7 @@
 
               <section class="mt-6">
                 <h3 class="text-[10px] tracking-[0.14em] text-neutral-500 uppercase">Delivery</h3>
-                <div class="mt-2 space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                <div class="mt-2 space-y-2 rounded-xl border border-white/10 bg-white/3 p-3">
                   <div class="flex items-center justify-between gap-3">
                     <span class="text-sm font-semibold text-neutral-50 uppercase">
                       {analysis.optimization.recommendedFormat}
@@ -564,7 +564,7 @@
                 <h3 class="text-[10px] tracking-[0.14em] text-neutral-500 uppercase">
                   Accessibility
                 </h3>
-                <div class="mt-2 space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                <div class="mt-2 space-y-2 rounded-xl border border-white/10 bg-white/3 p-3">
                   {#if analysis.accessibility.isDecorative}
                     <p class="text-sm text-neutral-200">
                       Decorative &mdash; ship it with an empty <code class="text-indigo-300"

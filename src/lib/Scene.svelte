@@ -63,6 +63,23 @@
 <!-- A second, dimmer directional light from roughly the opposite side, so the
      side facing away from the key light isn't pitch black. -->
 <T.DirectionalLight position={[-4, -2, -3]} intensity={0.3} />
+<!-- Two more fill lights covering the other two diagonal corners. The small
+     cubes (see PictureCube.svelte's cubeGroup) are fully metallic and can end
+     up scattered into any of 8 octant positions when exploded on hover —
+     metals barely respond to the ambient/hemisphere lights above, so without
+     light coming from all four diagonals some of those positions would
+     render black. Dimmer than the key light so they read as fill, not a
+     second sun. -->
+<T.DirectionalLight position={[-5, 6, -4]} intensity={0.5} />
+<T.DirectionalLight position={[4, -3, 5]} intensity={0.5} />
+
+<T.DirectionalLight position={[0, 10, 0]} intensity={1.3} />  
+<T.DirectionalLight position={[0, -10, 0]} intensity={1.3} />  
+<T.DirectionalLight position={[10, 0, 0]} intensity={1.3} />  
+<T.DirectionalLight position={[-10, 0, 0]} intensity={1.3} />  
+<T.DirectionalLight position={[0, 0, 10]} intensity={1.3} />  
+<T.DirectionalLight position={[0, 0, -10]} intensity={1.3} />  
+
 
 <!--
   The cube's material is polished chrome (metalness 1, roughness 0.1 — see
@@ -89,30 +106,34 @@
          we don't have to get its rotation exactly right for it to show up. -->
     <T.MeshBasicMaterial color="#ffffff" side={THREE.DoubleSide} />
   </T.Mesh>
-  <!-- bottom: dark -->
+  <!-- bottom: deep amber — was near-black; the diamond's refraction shows
+       whatever's on the *far* side of it from the camera (unlike the chrome
+       cube, which reflects the *near* side), so the far three faces need
+       real hue, not just near-black neutrals, or refraction reads as solid
+       black. Still dark enough to keep contrast against the bright top/side. -->
   <T.Mesh position={[0, -6, 0]}>
     <T.PlaneGeometry args={[12, 12]} />
-    <T.MeshBasicMaterial color="#08080d" side={THREE.DoubleSide} />
+    <T.MeshBasicMaterial color="#7c2d12" side={THREE.DoubleSide} />
   </T.Mesh>
   <!-- +X side: indigo accent, matching the rest of the UI -->
   <T.Mesh position={[6, 0, 0]}>
     <T.PlaneGeometry args={[12, 12]} />
     <T.MeshBasicMaterial color="#6366f1" side={THREE.DoubleSide} />
   </T.Mesh>
-  <!-- -X side: dark neutral -->
+  <!-- -X side: deep magenta (see bottom face comment) -->
   <T.Mesh position={[-6, 0, 0]}>
     <T.PlaneGeometry args={[12, 12]} />
-    <T.MeshBasicMaterial color="#1e1e2e" side={THREE.DoubleSide} />
+    <T.MeshBasicMaterial color="#831843" side={THREE.DoubleSide} />
   </T.Mesh>
   <!-- +Z side: pale indigo -->
   <T.Mesh position={[0, 0, 6]}>
     <T.PlaneGeometry args={[12, 12]} />
     <T.MeshBasicMaterial color="#c7d2fe" side={THREE.DoubleSide} />
   </T.Mesh>
-  <!-- -Z side: dark neutral -->
+  <!-- -Z side: deep indigo (see bottom face comment) -->
   <T.Mesh position={[0, 0, -6]}>
     <T.PlaneGeometry args={[12, 12]} />
-    <T.MeshBasicMaterial color="#08080d" side={THREE.DoubleSide} />
+    <T.MeshBasicMaterial color="#312e81" side={THREE.DoubleSide} />
   </T.Mesh>
 </VirtualEnvironment>
 
